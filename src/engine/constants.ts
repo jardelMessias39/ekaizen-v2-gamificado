@@ -1,4 +1,4 @@
-import { Upgrade } from './types';
+import type { Upgrade } from './types';
 
 export const UPGRADES: Record<string, Upgrade> = {
   '5s': {

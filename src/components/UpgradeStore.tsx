@@ -1,7 +1,7 @@
 import { useGameStore } from '../store/gameStore';
 import { UPGRADES } from '../engine/constants';
 import { calculateUpgradeCost } from '../engine/core';
-import { UpgradeId } from '../engine/types';
+import type { UpgradeId } from '../engine/types';
 import { formatNumber } from '../utils/formatters';
 import { playSound } from '../utils/audio';
 import { motion } from 'framer-motion';

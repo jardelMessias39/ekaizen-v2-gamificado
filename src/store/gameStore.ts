@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { GameState, UpgradeId, DerivedStats } from '../engine/types';
+import type { GameState, UpgradeId, DerivedStats } from '../engine/types';
 import { createInitialState, processTick, buyUpgrade, calculateDerivedStats, clickFactory } from '../engine/core';
 
 interface GameStore extends GameState {

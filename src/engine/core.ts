@@ -1,5 +1,5 @@
 import { UPGRADES, INITIAL_STATE } from './constants';
-import { GameState, DerivedStats, UpgradeId } from './types';
+import type { GameState, DerivedStats, UpgradeId } from './types';
 
 export const createInitialState = (): GameState => ({
   points: 0,
