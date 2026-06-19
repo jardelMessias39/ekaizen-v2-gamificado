@@ -122,3 +122,17 @@ export const processTick = (state: GameState, currentTimestamp: number): GameSta
     lastTickTimestamp: state.lastTickTimestamp + (deltaSeconds * 1000), // Advance exactly the processed seconds
   };
 };
+
+export const clickFactory = (state: GameState): GameState => {
+  const stats = calculateDerivedStats(state.upgrades);
+  // manual clicks are subject to the same defect rate, evaluated individually
+  const isDefect = Math.random() < stats.defectRate;
+  
+  return {
+    ...state,
+    totalProduced: state.totalProduced + 1,
+    totalDefective: state.totalDefective + (isDefect ? 1 : 0),
+    totalGood: state.totalGood + (isDefect ? 0 : 1),
+    points: state.points + (isDefect ? 0 : 1),
+  };
+};

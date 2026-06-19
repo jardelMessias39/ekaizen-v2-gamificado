@@ -3,6 +3,7 @@ import { UPGRADES } from '../engine/constants';
 import { calculateUpgradeCost } from '../engine/core';
 import { UpgradeId } from '../engine/types';
 import { formatNumber } from '../utils/formatters';
+import { playSound } from '../utils/audio';
 import { motion } from 'framer-motion';
 import { Zap, Wrench, AlertTriangle, ArrowUpCircle, ShieldCheck, Factory } from 'lucide-react';
 
@@ -38,7 +39,14 @@ export const UpgradeStore = () => {
               key={upgrade.id}
               whileHover={canAfford ? { scale: 1.02 } : {}}
               whileTap={canAfford ? { scale: 0.98 } : {}}
-              onClick={() => buy(upgrade.id as UpgradeId)}
+              onClick={() => {
+                if (canAfford) {
+                  buy(upgrade.id as UpgradeId);
+                  playSound('buy');
+                } else {
+                  playSound('error');
+                }
+              }}
               disabled={!canAfford}
               className={`relative overflow-hidden p-4 rounded-xl text-left border transition-colors ${
                 isMaxed 

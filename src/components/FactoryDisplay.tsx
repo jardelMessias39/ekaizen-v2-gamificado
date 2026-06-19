@@ -1,8 +1,9 @@
 import { useEffect, useState, useRef } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Box, Sparkles, AlertCircle } from 'lucide-react';
+import { Box, Sparkles, AlertCircle, Hand } from 'lucide-react';
 import { formatNumber, formatPercentage } from '../utils/formatters';
+import { playSound } from '../utils/audio';
 
 interface FloatingItem {
   id: number;
@@ -11,7 +12,7 @@ interface FloatingItem {
 }
 
 export const FactoryDisplay = () => {
-  const { points, stats, totalProduced, totalDefective } = useGameStore();
+  const { points, stats, totalProduced, totalDefective, manualClick } = useGameStore();
   const [items, setItems] = useState<FloatingItem[]>([]);
   const prevProducedRef = useRef(totalProduced);
   const prevDefectiveRef = useRef(totalDefective);
@@ -88,6 +89,23 @@ export const FactoryDisplay = () => {
           </span>
           <span className="text-slate-500 text-xs mt-1 z-10">eficiência geral</span>
         </div>
+      </div>
+
+      {/* Manual Click Button */}
+      <div className="relative z-10 mb-12">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => {
+            playSound('click');
+            manualClick();
+          }}
+          className="group relative flex flex-col items-center justify-center w-40 h-40 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full shadow-[0_0_40px_rgba(99,102,241,0.4)] border-4 border-slate-900 overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-white/20 group-hover:bg-transparent transition-colors"></div>
+          <Hand size={48} className="text-white mb-2" />
+          <span className="text-white font-bold tracking-widest uppercase text-sm">Produzir</span>
+        </motion.button>
       </div>
 
       {/* Animation Area - The Factory Floor */}

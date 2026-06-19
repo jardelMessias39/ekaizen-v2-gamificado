@@ -1,38 +1,51 @@
 import { create } from 'zustand';
 import { GameState, UpgradeId, DerivedStats } from '../engine/types';
-import { createInitialState, processTick, buyUpgrade, calculateDerivedStats } from '../engine/core';
+import { createInitialState, processTick, buyUpgrade, calculateDerivedStats, clickFactory } from '../engine/core';
 
 interface GameStore extends GameState {
   stats: DerivedStats;
   history: Array<{ time: string; producao: number; defeitosPM: number; oee: number }>;
   buy: (upgradeId: UpgradeId) => void;
   tick: () => void;
+  manualClick: () => void;
   reset: () => void;
   isHydrated: boolean;
   setHydrated: () => void;
 }
 
 const STORAGE_KEY = 'kaizen-clicker-save';
+const ANTI_CHEAT_SALT = 'jardel-kaizen-senh4-s3cr3t4';
 
-// Helper to load state from localStorage safely
+const generateChecksum = (data: GameState) => {
+  return btoa(encodeURIComponent(JSON.stringify(data) + ANTI_CHEAT_SALT));
+};
+
+// Helper to load state from localStorage safely with Anti-Cheat
 const loadState = (): GameState => {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      // Ensure we don't load a severely outdated format by verifying basic properties
-      if (parsed && typeof parsed.points === 'number' && parsed.upgrades) {
-        // Also update lastTickTimestamp to now so we calculate delta correctly on return
-        // Actually, if we just parse it, the next processTick will calculate the delta automatically!
-        // This is exactly what "Aba em background continua produzindo" requires. 
-        // If they close the game for 10 hours, they get 10 hours of production!
-        return parsed as GameState;
+      if (parsed.data && parsed.checksum) {
+        if (generateChecksum(parsed.data) === parsed.checksum) {
+          return parsed.data as GameState;
+        } else {
+          console.warn('⚠️ ANTI-CHEAT ATIVADO: O save file foi adulterado manualmente! O progresso foi resetado.');
+        }
       }
     }
   } catch (e) {
     console.error("Failed to load save", e);
   }
   return createInitialState();
+};
+
+const saveState = (state: GameState) => {
+  const payload = {
+    data: state,
+    checksum: generateChecksum(state)
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
 };
 
 export const useGameStore = create<GameStore>((set, get) => {
@@ -54,7 +67,19 @@ export const useGameStore = create<GameStore>((set, get) => {
           ...newState,
           stats: calculateDerivedStats(newState.upgrades),
         };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(finalState));
+        saveState(newState);
+        return finalState;
+      });
+    },
+
+    manualClick: () => {
+      set((state) => {
+        const newState = clickFactory(state);
+        const finalState = {
+          ...newState,
+          stats: calculateDerivedStats(newState.upgrades),
+        };
+        saveState(newState);
         return finalState;
       });
     },
@@ -87,7 +112,7 @@ export const useGameStore = create<GameStore>((set, get) => {
         };
         
         // We only save the game state, not the transient history
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
+        saveState(newState);
         return finalState;
       });
     },
@@ -95,7 +120,7 @@ export const useGameStore = create<GameStore>((set, get) => {
     reset: () => {
       const freshState = createInitialState();
       localStorage.removeItem(STORAGE_KEY);
-      set({ ...freshState, stats: calculateDerivedStats(freshState.upgrades) });
+      set({ ...freshState, stats: calculateDerivedStats(freshState.upgrades), history: [] });
     },
   };
 });
