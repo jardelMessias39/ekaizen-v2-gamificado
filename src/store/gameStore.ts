@@ -4,6 +4,7 @@ import { createInitialState, processTick, buyUpgrade, calculateDerivedStats } fr
 
 interface GameStore extends GameState {
   stats: DerivedStats;
+  history: Array<{ time: string; producao: number; defeitosPM: number; oee: number }>;
   buy: (upgradeId: UpgradeId) => void;
   tick: () => void;
   reset: () => void;
@@ -40,6 +41,7 @@ export const useGameStore = create<GameStore>((set, get) => {
   return {
     ...loadedState,
     stats: calculateDerivedStats(loadedState.upgrades),
+    history: [],
     isHydrated: false,
     setHydrated: () => set({ isHydrated: true }),
 
@@ -64,11 +66,28 @@ export const useGameStore = create<GameStore>((set, get) => {
         
         if (newState === state) return state; // Less than 1 second passed
 
+        const newStats = calculateDerivedStats(newState.upgrades);
+        const date = new Date(currentTimestamp);
+        const timeLabel = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
+        
+        // Defeitos por minuto estimado = (taxa de defeito * velocidade) * 60
+        const defeitosPM = Math.floor(newStats.defectRate * newStats.speed * 60);
+
+        const newHistoryEntry = {
+          time: timeLabel,
+          producao: Math.floor(newState.totalProduced),
+          defeitosPM,
+          oee: Math.floor(newStats.oee * 100)
+        };
+
         const finalState = {
           ...newState,
-          stats: calculateDerivedStats(newState.upgrades),
+          stats: newStats,
+          history: [...state.history, newHistoryEntry].slice(-30), // keep last 30 ticks for chart
         };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(finalState));
+        
+        // We only save the game state, not the transient history
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
         return finalState;
       });
     },
