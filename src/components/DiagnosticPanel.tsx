@@ -37,16 +37,16 @@ export const DiagnosticPanel = () => {
       initial={{ opacity: 0, y: -20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className={`w-full max-w-3xl mb-8 p-4 rounded-xl border-2 flex items-start gap-4 transition-colors duration-500 backdrop-blur-sm ${colorClass} ${glowClass}`}
+      className={`w-full max-w-3xl mb-4 p-3 rounded-xl border flex items-center gap-3 transition-colors duration-500 backdrop-blur-sm ${colorClass} ${glowClass}`}
     >
-      <div className="mt-1">
-        <Icon className={status === 'critical' ? 'animate-bounce' : ''} size={28} />
-      </div>
       <div>
-        <h3 className="font-black text-xs uppercase tracking-widest mb-1 opacity-80">
+        <Icon className={status === 'critical' ? 'animate-bounce' : ''} size={24} />
+      </div>
+      <div className="flex flex-col">
+        <h3 className="font-black text-[10px] uppercase tracking-widest opacity-80">
           Diagnóstico do Analista IA
         </h3>
-        <p className="text-sm font-bold leading-relaxed">{message}</p>
+        <p className="text-sm font-bold leading-snug">{message}</p>
       </div>
     </motion.div>
   );

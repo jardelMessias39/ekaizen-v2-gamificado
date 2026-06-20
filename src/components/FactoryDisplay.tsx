@@ -57,11 +57,8 @@ export const FactoryDisplay = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-transparent to-slate-900/80"></div>
 
       {/* Main Points Display */}
-      <div className="relative z-10 flex flex-col items-center mb-16">
-        <span className="text-emerald-400 font-bold uppercase tracking-widest text-sm mb-2 flex items-center gap-2">
-          <Sparkles size={16} /> Pontos Kaizen
-        </span>
-        <h1 className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white to-slate-400 drop-shadow-lg">
+      <div className="relative z-10 flex flex-col items-center mt-6">
+        <h1 className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300 drop-shadow-sm mb-4">
           {Math.floor(points).toLocaleString('pt-BR')}
         </h1>
       </div>
@@ -70,22 +67,24 @@ export const FactoryDisplay = () => {
       <DiagnosticPanel />
 
       {/* Production Indicators */}
-      <div className="relative z-10 grid grid-cols-3 gap-6 w-full max-w-3xl mb-12">
-        <div className="bg-slate-800/80 backdrop-blur border border-slate-700/50 p-6 rounded-2xl flex flex-col items-center shadow-xl">
+      <div className="relative z-10 grid grid-cols-3 gap-4 w-full max-w-3xl mb-6">
+        <div className="bg-slate-800/80 backdrop-blur border border-slate-700/50 p-4 rounded-2xl flex flex-col items-center shadow-xl">
           <span className="text-slate-400 text-sm mb-1 uppercase font-semibold">Velocidade</span>
-          <span className="text-3xl font-bold text-white">{formatNumber(stats.speed)}</span>
+          <span className="text-3xl font-bold text-white">
+            {formatNumber(stats.speed)}
+          </span>
           <span className="text-slate-500 text-xs mt-1">peças / seg</span>
         </div>
         
-        <div className="bg-slate-800/80 backdrop-blur border border-slate-700/50 p-6 rounded-2xl flex flex-col items-center shadow-xl">
+        <div className="bg-slate-800/80 backdrop-blur border border-slate-700/50 p-4 rounded-2xl flex flex-col items-center shadow-xl">
           <span className="text-slate-400 text-sm mb-1 uppercase font-semibold">Defeitos</span>
-          <span className={`text-3xl font-bold ${stats.defectRate > 0.2 ? 'text-red-400' : 'text-emerald-400'}`}>
+          <span className="text-3xl font-bold text-emerald-400">
             {formatPercentage(stats.defectRate)}
           </span>
-          <span className="text-slate-500 text-xs mt-1">taxa atual</span>
+          <span className="text-slate-500 text-xs mt-1">Taxa atuais</span>
         </div>
 
-        <div className="bg-slate-800/80 backdrop-blur border border-slate-700/50 p-6 rounded-2xl flex flex-col items-center shadow-xl relative overflow-hidden">
+        <div className="bg-slate-800/80 backdrop-blur border border-slate-700/50 p-4 rounded-2xl flex flex-col items-center shadow-xl relative overflow-hidden">
           <div className="absolute inset-0 bg-indigo-500/10"></div>
           <span className="text-slate-400 text-sm mb-1 uppercase font-semibold z-10">OEE</span>
           <span className="text-3xl font-bold text-indigo-400 z-10">
@@ -96,7 +95,7 @@ export const FactoryDisplay = () => {
       </div>
 
       {/* Manual Click Button */}
-      <div className="relative z-10 mb-12">
+      <div className="relative z-10 mb-6 mt-2">
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.9 }}
@@ -104,16 +103,16 @@ export const FactoryDisplay = () => {
             playSound('click');
             manualClick();
           }}
-          className="group relative flex flex-col items-center justify-center w-40 h-40 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full shadow-[0_0_40px_rgba(99,102,241,0.4)] border-4 border-slate-900 overflow-hidden"
+          className="group relative flex flex-col items-center justify-center w-32 h-32 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full shadow-[0_0_40px_rgba(99,102,241,0.4)] border-4 border-slate-900 overflow-hidden cursor-pointer"
         >
           <div className="absolute inset-0 bg-white/20 group-hover:bg-transparent transition-colors"></div>
-          <Hand size={48} className="text-white mb-2" />
-          <span className="text-white font-bold tracking-widest uppercase text-sm">Produzir</span>
+          <Hand size={40} className="text-white mb-1" />
+          <span className="text-white font-bold tracking-widest uppercase text-xs">Produzir</span>
         </motion.button>
       </div>
 
       {/* Animation Area - The Factory Floor */}
-      <div className="relative w-full max-w-4xl h-48 border-b-4 border-slate-700 mt-auto flex items-end justify-center">
+      <div className="relative w-full max-w-4xl h-32 border-b-4 border-slate-700 mt-auto flex items-end justify-center">
         <div className="absolute bottom-0 w-full h-12 bg-slate-800/50 border-t border-slate-700"></div>
         
         <AnimatePresence>
