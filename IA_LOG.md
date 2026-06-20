@@ -21,3 +21,10 @@ Para ir além do que foi proposto no desafio original, decidi idealizar e implem
 
 ## Conclusão e Sincronização
 A sincronização do meu raciocínio arquitetural com o versionamento feito através de **Commits Atômicos** permitiu que o projeto crescesse de forma modular, rastreável e altamente profissional. Foi um trabalho de forte liderança no direcionamento técnico, delegando o trabalho repetitivo e de sintaxe fina para a IA.
+
+## Anexo: Principais Interações (O que pedi, o que a IA sugeriu e o que eu rejeitei)
+Para deixar claro o processo de "Pair Programming", registro aqui algumas interações cruciais onde tomei a decisão final:
+1. **O Loop do Jogo:** A princípio, a IA sugeriria lógicas simples em componentes React para atualizar os pontos. Eu **rejeitei** e exigi que a lógica fosse extraída para um motor matemático isolado (`processTick`), garantindo que a regra de negócio ficasse puramente funcional e testável.
+2. **O Bug Visual do Botão Central:** Quando a IA entregou o layout inicial, a parte inferior do botão principal estava sendo "esmagada" pela tela inferior (Dashboard). Eu apontei o erro, instruí a IA a destravar o limite de altura da área superior (`min-h-[600px]`) e a empurrar os gráficos escuros mais para baixo.
+3. **O Sistema de Ranking:** A IA sugeriu salvar os pontos constantemente. Eu **adaptei** a ideia e pedi especificamente para que a pontuação só fosse para o ranking a cada 5 minutos, e exigi um efeito visual de "foto" que desse feedback apenas nesses momentos, otimizando muito a lógica.
+4. **O Quarto Gráfico (Dashboard):** Quando pedi para preencher um espaço vazio nos gráficos, a IA me deu duas opções (Gráfico Analítico ou Termômetro Dinâmico). Eu **tomei a decisão** de seguir com o Termômetro de Esforço porque queria mais *Juice* no jogo. A IA fez o código base, mas eu guiei exatamente como ele deveria reagir aos cliques manuais.
