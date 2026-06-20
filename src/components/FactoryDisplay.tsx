@@ -113,6 +113,7 @@ export const FactoryDisplay = () => {
           onClick={() => {
             playSound('click');
             manualClick();
+            window.dispatchEvent(new Event('manual-click'));
           }}
           className="group relative flex flex-col items-center justify-center w-36 h-36 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full shadow-[0_0_40px_rgba(99,102,241,0.6)] border-4 border-slate-900 overflow-hidden cursor-grab active:cursor-grabbing"
         >
