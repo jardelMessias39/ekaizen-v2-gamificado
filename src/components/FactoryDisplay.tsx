@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Box, Sparkles, AlertCircle, Hand } from 'lucide-react';
 import { formatNumber, formatPercentage } from '../utils/formatters';
 import { playSound } from '../utils/audio';
+import { DiagnosticPanel } from './DiagnosticPanel';
 
 interface FloatingItem {
   id: number;
@@ -64,6 +65,9 @@ export const FactoryDisplay = () => {
           {Math.floor(points).toLocaleString('pt-BR')}
         </h1>
       </div>
+
+      {/* IA Bottleneck Diagnostic */}
+      <DiagnosticPanel />
 
       {/* Production Indicators */}
       <div className="relative z-10 grid grid-cols-3 gap-6 w-full max-w-3xl mb-12">
