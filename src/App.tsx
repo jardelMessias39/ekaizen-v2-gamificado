@@ -19,9 +19,11 @@ function App() {
         <Toaster position="bottom-left" />
         {showRanking && <RankingModal onClose={() => setShowRanking(false)} />}
         
-        <div className="flex flex-col flex-1 h-full relative overflow-y-auto">
+        <div className="flex flex-col flex-1 h-full relative overflow-y-auto bg-slate-950 pb-12">
           <FactoryDisplay />
-          <Dashboard />
+          <div className="mt-12">
+            <Dashboard />
+          </div>
         </div>
         <UpgradeStore />
       </div>
