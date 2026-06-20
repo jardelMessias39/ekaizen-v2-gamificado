@@ -23,7 +23,7 @@ export const RankingTicker = ({ onClick }: { onClick: () => void }) => {
       setTimeout(() => setFlash(false), 150);
       setTimeout(() => setSnapshotData(null), 3000);
       
-    }, 60000); // 1 minuto (para teste ser visível sem demorar 5 min)
+    }, 300000); // 5 minutos de intervalo conforme planejado
     return () => clearInterval(interval);
   }, [currentPlayerName, saveScore]);
 
