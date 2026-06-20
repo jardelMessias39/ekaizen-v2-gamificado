@@ -15,6 +15,7 @@ export interface GameState {
   totalDefective: number;
   upgrades: Record<UpgradeId, number>;
   lastTickTimestamp: number;
+  achievements: string[];
 }
 
 export interface DerivedStats {

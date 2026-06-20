@@ -15,6 +15,7 @@ export const createInitialState = (): GameState => ({
     'heijunka': 0,
   },
   lastTickTimestamp: Date.now(),
+  achievements: [],
 });
 
 export const calculateUpgradeCost = (upgradeId: UpgradeId, currentPurchases: number): number => {

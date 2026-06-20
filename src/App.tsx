@@ -5,6 +5,7 @@ import { Dashboard } from './components/Dashboard';
 import { RankingModal } from './components/RankingModal';
 import { useGameLoop } from './hooks/useGameLoop';
 import { Trophy } from 'lucide-react';
+import { Toaster } from 'sonner';
 
 function App() {
   useGameLoop();
@@ -12,7 +13,7 @@ function App() {
 
   return (
     <div className="flex h-screen w-full bg-slate-900 overflow-hidden font-sans text-slate-200">
-      
+      <Toaster position="bottom-left" />
       {showRanking && <RankingModal onClose={() => setShowRanking(false)} />}
       
       <div className="flex flex-col flex-1 h-full relative overflow-y-auto">

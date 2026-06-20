@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import type { GameState, UpgradeId, DerivedStats } from '../engine/types';
 import { createInitialState, processTick, buyUpgrade, calculateDerivedStats, clickFactory } from '../engine/core';
+import { toast } from 'sonner';
+import { playSound } from '../utils/audio';
 
 interface GameStore extends GameState {
   stats: DerivedStats;
@@ -48,6 +50,36 @@ const saveState = (state: GameState) => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
 };
 
+const checkAchievements = (state: GameState, stats: DerivedStats) => {
+  const currentAchievements = new Set(state.achievements || []);
+  let updated = false;
+
+  const milestones = [
+    { id: '100_pts', condition: state.points >= 100, msg: '🎉 Marco: 100 Pontos Kaizen!' },
+    { id: '1k_pts', condition: state.points >= 1000, msg: '🚀 Marco: 1.000 Pontos!' },
+    { id: '10k_pts', condition: state.points >= 10000, msg: '🏭 Marco: 10.000 Pontos! Mega Fábrica!' },
+    { id: 'oee_80', condition: stats.oee >= 0.8, msg: '⚙️ Marco: 80% OEE Atingido! Alta Eficiência.' },
+    { id: 'oee_100', condition: stats.oee >= 1.0, msg: '🏆 PERFEIÇÃO: 100% OEE Atingido!' },
+    { id: 'zero_defect', condition: stats.defectRate <= 0 && state.totalProduced > 100, msg: '✨ ZERO DEFEITOS alcançado!' }
+  ];
+
+  milestones.forEach(m => {
+    if (m.condition && !currentAchievements.has(m.id)) {
+      currentAchievements.add(m.id);
+      updated = true;
+      toast.success(m.msg, {
+        duration: 5000,
+        style: { background: '#1e293b', color: '#f8fafc', border: '1px solid #3b82f6', fontSize: '14px', fontWeight: 'bold' }
+      });
+      setTimeout(() => playSound('buy'), 100);
+    }
+  });
+
+  if (updated) {
+    state.achievements = Array.from(currentAchievements);
+  }
+};
+
 export const useGameStore = create<GameStore>((set, get) => {
   const loadedState = loadState();
 
@@ -67,7 +99,8 @@ export const useGameStore = create<GameStore>((set, get) => {
           ...newState,
           stats: calculateDerivedStats(newState.upgrades),
         };
-        saveState(newState);
+        checkAchievements(finalState, finalState.stats);
+        saveState(finalState);
         return finalState;
       });
     },
@@ -79,7 +112,8 @@ export const useGameStore = create<GameStore>((set, get) => {
           ...newState,
           stats: calculateDerivedStats(newState.upgrades),
         };
-        saveState(newState);
+        checkAchievements(finalState, finalState.stats);
+        saveState(finalState);
         return finalState;
       });
     },
@@ -111,8 +145,9 @@ export const useGameStore = create<GameStore>((set, get) => {
           history: [...state.history, newHistoryEntry].slice(-30), // keep last 30 ticks for chart
         };
         
+        checkAchievements(finalState, newStats);
         // We only save the game state, not the transient history
-        saveState(newState);
+        saveState(finalState);
         return finalState;
       });
     },
