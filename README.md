@@ -1,73 +1,43 @@
-# React + TypeScript + Vite
+# eKaizen: Desafio Corporativo 🏭
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Bem-vindo ao **eKaizen**, um simulador web interativo construído para testar habilidades corporativas reais como Atenção Plena, Tomada de Decisão e Reflexo sob Pressão, envelopado em uma temática industrial de Manufatura Enxuta (Kaizen).
 
-Currently, two official plugins are available:
+## 🎮 Sobre o Projeto
+O projeto mescla a progressão passiva de um *Idle Game* (onde a fábrica nunca para) com a tensão ativa de um *Minigame de Separação de Peças*. O objetivo do jogador é gerenciar o OEE (Overall Equipment Effectiveness) da fábrica, mantendo os defeitos próximos de zero, e realizar investimentos estratégicos em metodologias Lean (5S, Poka-Yoke, Kanban) com os pontos gerados.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 Tecnologias Utilizadas
+- **React 18** (Vite)
+- **TypeScript** (Tipagem forte para segurança)
+- **Tailwind CSS** (Estilização baseada em utilitários e UI Glassmorphism)
+- **Zustand** (Gerenciamento de Estado global leve e persistente)
+- **Framer Motion** (Física avançada, Drag-and-Drop e Animações de Layout)
+- **Lucide React** (Ícones SVG)
 
-## React Compiler
+## ⚙️ Como Executar Localmente
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Pré-requisitos
+- Node.js (v18 ou superior recomendado)
+- NPM ou Yarn
 
-## Expanding the ESLint configuration
+### Instalação
+1. Clone o repositório ou baixe os arquivos.
+2. Abra o terminal na pasta raiz do projeto.
+3. Instale as dependências:
+   ```bash
+   npm install
+   ```
+4. Inicie o servidor de desenvolvimento:
+   ```bash
+   npm run dev
+   ```
+5. Abra o navegador no endereço indicado (geralmente `http://localhost:5173`).
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🧠 Metodologia Lean no Código
+O projeto aplica conceitos da indústria no próprio código:
+- **Kaizen (Melhoria Contínua)**: Desenvolvido de forma iterativa, começando com um MVP simples e escalando para física complexa.
+- **Andon**: Regras de interdição (Game Over) quando os erros atingem um limite crítico.
+- **Isolamento de Componentes**: A arquitetura do React foi otimizada com `React.memo` e abstração de estado (Ex: `ScoreOverlay`) para garantir 60FPS constantes mesmo com alto volume de re-renderizações lógicas.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 👥 Autoria e Desenvolvimento
+Desenvolvido por **Jardel Messias**.
+(Documentação técnica detalhada das sessões de Pair Programming e QA pode ser encontrada no `IA_LOG.md`).
