@@ -207,11 +207,12 @@ export const SortingMinigame = memo(() => {
             playSound('click');
             spawnBox();
           }}
-          className="group relative flex flex-col items-center justify-center w-32 h-32 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full shadow-[0_0_40px_rgba(99,102,241,0.6)] border-4 border-slate-900"
+          className="group relative flex flex-col items-center justify-center w-32 h-32 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full shadow-[0_0_40px_rgba(99,102,241,0.6)] border-4 border-slate-900 touch-none select-none"
+          onContextMenu={(e) => e.preventDefault()}
         >
           <div className="absolute inset-0 bg-white/20 group-hover:bg-transparent transition-colors rounded-full"></div>
-          <Hand size={32} className="text-white mb-1" />
-          <span className="text-white font-bold tracking-widest uppercase text-[10px]">Produzir</span>
+          <Hand size={32} className="text-white mb-1 pointer-events-none" />
+          <span className="text-white font-bold tracking-widest uppercase text-[10px] select-none pointer-events-none">Produzir</span>
         </motion.button>
       </div>
       
@@ -268,14 +269,16 @@ const DraggableBox = memo(({ box, duration, onResolve, onTimeout }: { box: Pendi
           }
         }}
         whileTap={{ scale: 0.9 }}
-        className={`cursor-grab active:cursor-grabbing flex flex-col items-center p-3 rounded-xl bg-slate-800 border-2 ${
+        onContextMenu={(e) => e.preventDefault()}
+        draggable={false}
+        className={`cursor-grab active:cursor-grabbing flex flex-col items-center p-3 rounded-xl bg-slate-800 border-2 select-none touch-none ${
           box.color === 'red' ? 'border-red-500 text-red-500' :
           box.color === 'green' ? 'border-emerald-500 text-emerald-500' :
           box.color === 'blue' ? 'border-blue-500 text-blue-500' :
           'border-yellow-400 text-yellow-400'
         }`}
       >
-        <BoxIcon size={32} />
+        <BoxIcon size={32} className="pointer-events-none" />
       </motion.div>
     </motion.div>
   );
