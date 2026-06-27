@@ -78,26 +78,23 @@ export const FactoryDisplay = () => {
         </div>
 
         {/* Right: Production Indicators */}
-        <div className="flex gap-4">
-          <div className="bg-slate-800/80 backdrop-blur border border-slate-700/50 p-4 rounded-xl flex flex-col items-center shadow-lg w-28">
-            <span className="text-slate-400 text-[10px] mb-1 uppercase font-semibold">Velocidade</span>
-            <span className="text-xl font-bold text-white">
-              {formatNumber(stats.speed)}
-            </span>
+        <div className="absolute top-6 right-6 z-30 flex gap-2 pointer-events-none">
+          <div className="bg-slate-800/80 backdrop-blur border border-slate-700 rounded-xl p-2 flex flex-col items-center min-w-[90px]">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Velocidade</span>
+            <span className="text-lg font-black text-white">{stats.speed.toFixed(1)}</span>
           </div>
           
-          <div className="bg-slate-800/80 backdrop-blur border border-slate-700/50 p-4 rounded-xl flex flex-col items-center shadow-lg w-28">
-            <span className="text-slate-400 text-[10px] mb-1 uppercase font-semibold">Defeitos</span>
-            <span className="text-xl font-bold text-emerald-400">
-              {formatPercentage(stats.defectRate)}
+          <div className="bg-slate-800/80 backdrop-blur border border-slate-700 rounded-xl p-2 flex flex-col items-center min-w-[90px]">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Defeitos</span>
+            <span className={`text-lg font-black ${stats.defectRate > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
+              {(stats.defectRate * 100).toFixed(0)}%
             </span>
           </div>
 
-          <div className="bg-slate-800/80 backdrop-blur border border-slate-700/50 p-4 rounded-xl flex flex-col items-center shadow-lg w-28 relative overflow-hidden">
-            <div className="absolute inset-0 bg-indigo-500/10"></div>
-            <span className="text-slate-400 text-[10px] mb-1 uppercase font-semibold z-10">OEE</span>
-            <span className="text-xl font-bold text-indigo-400 z-10">
-              {formatPercentage(stats.oee)}
+          <div className="bg-slate-800/80 backdrop-blur border border-slate-700 rounded-xl p-2 flex flex-col items-center min-w-[90px]">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">OEE</span>
+            <span className="text-lg font-black text-indigo-400">
+              {(stats.oee * 100).toFixed(0)}%
             </span>
           </div>
         </div>

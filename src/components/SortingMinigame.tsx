@@ -63,7 +63,7 @@ const ThermometerOverlay = () => {
 };
 
 export const SortingMinigame = () => {
-  const { resolveBox, upgrades, isGameOver } = useGameStore();
+  const { resolveBox, upgrades, isGameOver, isMinigamePaused } = useGameStore();
   const [boxes, setBoxes] = useState<PendingBox[]>([]);
   const [tubePositions, setTubePositions] = useState<BoxColor[]>([...COLORS]);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -87,26 +87,26 @@ export const SortingMinigame = () => {
   }, [consecutiveCorrectManualBoxes]);
 
   useEffect(() => {
-    // Se a fábrica tá interditada, não brota caixa.
-    if (isGameOver) return;
+    // Se a fábrica tá interditada ou o minigame pausado (ex: ranking aberto), não brota caixa.
+    if (isGameOver || isMinigamePaused) return;
     
     // Auto-spawn a box every 2 seconds to represent background production
     const interval = setInterval(() => {
       spawnBox();
     }, 2000);
     return () => clearInterval(interval);
-  }, [isGameOver]);
+  }, [isGameOver, isMinigamePaused]);
 
-  // Limpar todas as caixas da tela se der Game Over
+  // Limpar todas as caixas da tela se der Game Over ou Pausar
   useEffect(() => {
-    if (isGameOver) {
+    if (isGameOver || isMinigamePaused) {
       setBoxes([]);
     }
-  }, [isGameOver]);
+  }, [isGameOver, isMinigamePaused]);
 
   // Embaralhar tubos a cada 2 minutos (Aumentar a dificuldade)
   useEffect(() => {
-    if (isGameOver) return;
+    if (isGameOver || isMinigamePaused) return;
     
     const shuffleInterval = setInterval(() => {
       setTubePositions(prev => {
@@ -117,7 +117,7 @@ export const SortingMinigame = () => {
     }, 120000); // 2 minutos (120000ms)
     
     return () => clearInterval(shuffleInterval);
-  }, [isGameOver]);
+  }, [isGameOver, isMinigamePaused]);
 
   const handleBoxResolve = useCallback((id: number, boxColor: BoxColor, tubeColor: BoxColor) => {
     const isCorrect = boxColor === tubeColor;

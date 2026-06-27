@@ -37,9 +37,9 @@ const loadScores = (): ScoreEntry[] => {
   }
   return [
     // Pre-populate some fake data just to make the UI look good initially
-    { name: 'Sênior Dev', score: 500000 },
-    { name: 'Pleno Ninja', score: 250000 },
-    { name: 'Junior Dedicado', score: 50000 },
+    { name: 'Dev Sênior', score: 500000 },
+    { name: 'Dev Pleno', score: 250000 },
+    { name: 'Dev Júnior', score: 50000 },
   ];
 };
 

@@ -8,6 +8,12 @@ interface RankingModalProps {
   onClose: () => void;
 }
 
+export const DEFAULT_RANKING = [
+  { name: 'Dev Sênior', score: 500000 },
+  { name: 'Dev Pleno', score: 250000 },
+  { name: 'Dev Júnior', score: 50000 },
+];
+
 export const RankingModal = ({ onClose }: RankingModalProps) => {
   const { points } = useGameStore();
   const { scores, saveScore, currentPlayerName, setCurrentPlayerName } = useRankingStore();

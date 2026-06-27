@@ -14,6 +14,8 @@ interface GameStore extends GameState {
   completeTutorial: () => void;
   reset: () => void;
   acknowledgeGameOver: () => void;
+  isMinigamePaused: boolean;
+  setMinigamePaused: (paused: boolean) => void;
   isHydrated: boolean;
   setHydrated: () => void;
 }
@@ -186,5 +188,8 @@ export const useGameStore = create<GameStore>((set) => {
         return newState;
       });
     },
+
+    isMinigamePaused: false,
+    setMinigamePaused: (paused: boolean) => set({ isMinigamePaused: paused }),
   };
 });

@@ -7,10 +7,17 @@ import { RankingTicker } from './components/RankingTicker';
 import { OnboardingModal } from './components/OnboardingModal';
 import { useGameLoop } from './hooks/useGameLoop';
 import { Toaster } from 'sonner';
+import { useGameStore } from './store/gameStore';
 
 function App() {
   useGameLoop();
   const [showRanking, setShowRanking] = useState(false);
+  const setMinigamePaused = useGameStore(state => state.setMinigamePaused);
+
+  // Pause minigame when ranking is open
+  useEffect(() => {
+    setMinigamePaused(showRanking);
+  }, [showRanking, setMinigamePaused]);
 
   return (
     <div className="flex flex-col h-screen w-full bg-slate-900 overflow-hidden font-sans text-slate-200">
