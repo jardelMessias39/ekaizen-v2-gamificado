@@ -153,7 +153,7 @@ export const SortingMinigame = memo(() => {
   const fallDuration = Math.max(2.0, 4.0 - speedBonus);
 
   return (
-    <div ref={containerRef} className="relative w-full min-h-[500px] lg:h-full border border-slate-700/50 rounded-2xl bg-slate-800/30 overflow-hidden flex flex-col justify-between p-4 shadow-[inset_0_0_50px_rgba(0,0,0,0.5)]">
+    <div ref={containerRef} className="relative w-full min-h-[400px] lg:h-full border border-slate-700/50 rounded-2xl bg-slate-800/30 overflow-hidden flex flex-col justify-between p-2 md:p-4 shadow-[inset_0_0_50px_rgba(0,0,0,0.5)] touch-pan-y">
       
       {/* SCORE & COMBO OVERLAY */}
       <ScoreOverlay />
@@ -175,7 +175,7 @@ export const SortingMinigame = memo(() => {
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
               key={color} 
               id={`tube-${color}`}
-              className={`w-24 h-28 rounded-b-2xl border-b-4 border-l-4 border-r-4 flex flex-col items-center justify-end pb-2 ${TUBE_STYLES[color]}`}
+              className={`flex-1 max-w-[96px] mx-0.5 md:mx-2 h-24 md:h-28 rounded-b-2xl border-b-4 border-l-4 border-r-4 flex flex-col items-center justify-end pb-2 ${TUBE_STYLES[color]}`}
             >
               <span className="text-[10px] font-black opacity-70 mb-1">+{pts} pts</span>
               <div className="w-12 h-4 bg-black/40 rounded-full blur-sm absolute top-4"></div>
@@ -252,14 +252,18 @@ const DraggableBox = memo(({ box, duration, onResolve, onTimeout }: { box: Pendi
           const x = info.point.x;
           // In a real robust app, we'd use element bounds, but dividing screen in 4 is quick for MVP.
           let droppedColor: BoxColor | null = null;
+          let minDistance = Infinity;
+
           for (const c of COLORS) {
             const el = document.getElementById(`tube-${c}`);
             if (el) {
               const rect = el.getBoundingClientRect();
-              // Allow a generous drop zone horizontally. The Y is handled by the wrapper.
-              if (x >= rect.left - 60 && x <= rect.right + 60) {
+              const tubeCenter = rect.left + rect.width / 2;
+              const distance = Math.abs(x - tubeCenter);
+              
+              if (distance < minDistance && distance < rect.width * 1.5) {
+                minDistance = distance;
                 droppedColor = c;
-                break;
               }
             }
           }

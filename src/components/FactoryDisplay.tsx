@@ -19,7 +19,7 @@ export const FactoryDisplay = () => {
   const pps = stats.speed * stats.oee * (1 - stats.defectRate);
 
   return (
-    <div className="flex-1 min-h-[600px] flex flex-col p-8 relative overflow-hidden bg-slate-900">
+    <div className="flex-1 min-h-0 flex flex-col p-4 md:p-8 relative overflow-hidden bg-slate-900">
       
       {/* Background Grid */}
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
@@ -69,15 +69,15 @@ export const FactoryDisplay = () => {
         </div>
       </div>
 
-      {/* IA Bottleneck Diagnostic (Floating bottom-left) */}
-      <div className="absolute bottom-6 left-6 z-30 w-full max-w-sm pointer-events-none">
+      {/* IA Bottleneck Diagnostic (Relative in flow) */}
+      <div className="relative z-30 w-full max-w-2xl mx-auto pointer-events-none mt-2 mb-2 lg:mb-6">
         <div className="pointer-events-auto">
           <DiagnosticPanel />
         </div>
       </div>
 
       {/* Sorting Minigame replacing the old manual button */}
-      <div className="relative z-20 flex justify-center w-full my-auto max-w-2xl self-center">
+      <div className="relative z-20 flex justify-center w-full flex-1 max-w-2xl mx-auto">
         <SortingMinigame />
       </div>
 
