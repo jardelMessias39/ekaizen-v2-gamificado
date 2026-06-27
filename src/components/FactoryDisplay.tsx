@@ -19,7 +19,7 @@ export const FactoryDisplay = () => {
   const pps = stats.speed * stats.oee * (1 - stats.defectRate);
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col p-4 md:p-8 relative overflow-hidden bg-slate-900">
+    <div className="flex-1 flex flex-col p-4 md:p-8 relative overflow-hidden bg-slate-900 min-h-[650px] lg:min-h-[750px]">
       
       {/* Background Grid */}
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
@@ -30,7 +30,7 @@ export const FactoryDisplay = () => {
         
         {/* Left: Points & PPS */}
         <div className="flex flex-col">
-          <h1 className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300 drop-shadow-sm">
+          <h1 className="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300 drop-shadow-sm py-2">
             {Math.floor(points).toLocaleString('pt-BR')}
           </h1>
           <div className="flex items-center gap-2 mt-2">

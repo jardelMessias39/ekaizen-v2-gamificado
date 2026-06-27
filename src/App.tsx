@@ -28,10 +28,9 @@ function App() {
         <OnboardingModal />
         {showRanking && <RankingModal onClose={() => setShowRanking(false)} />}
         
-        <div className="flex flex-col flex-1 h-full lg:overflow-y-auto relative bg-slate-950 pb-12">
+        <div className="flex flex-col flex-1 lg:h-full lg:overflow-y-auto relative bg-slate-950 pb-12">
           <FactoryDisplay />
-          <div className="mt+1
-          ">
+          <div className="mt-2">
             <Dashboard />
           </div>
         </div>
