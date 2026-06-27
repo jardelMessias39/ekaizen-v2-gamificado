@@ -1,48 +1,17 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useGameStore } from '../store/gameStore';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Box, AlertCircle, Hand } from 'lucide-react';
-import { formatNumber, formatPercentage } from '../utils/formatters';
+import { formatNumber } from '../utils/formatters';
 import { DiagnosticPanel } from './DiagnosticPanel';
 import { SortingMinigame } from './SortingMinigame';
 import { BonusModal } from './BonusModal';
 import { GameOverModal } from './GameOverModal';
 
-interface FloatingItem {
-  id: number;
-  x: number;
-  isDefect: boolean;
-}
-
 export const FactoryDisplay = () => {
   const { points, stats, totalProduced, totalDefective, consecutiveCorrectManualBoxes } = useGameStore();
-  const [items, setItems] = useState<FloatingItem[]>([]);
   const prevProducedRef = useRef(totalProduced);
   const prevDefectiveRef = useRef(totalDefective);
   
   useEffect(() => {
-    const diffProduced = Math.floor(totalProduced) - Math.floor(prevProducedRef.current);
-    const diffDefective = Math.floor(totalDefective) - Math.floor(prevDefectiveRef.current);
-    
-    if (diffProduced > 0) {
-      const newItems: FloatingItem[] = [];
-      const animationsToPlay = Math.min(diffProduced, 15);
-      
-      for (let i = 0; i < animationsToPlay; i++) {
-        newItems.push({
-          id: Date.now() + i + Math.random(),
-          x: Math.random() * 80 + 10,
-          isDefect: i < diffDefective
-        });
-      }
-      
-      setItems(prev => [...prev.slice(-15), ...newItems]);
-      
-      setTimeout(() => {
-        setItems(prev => prev.filter(item => !newItems.find(n => n.id === item.id)));
-      }, 4000); 
-    }
-    
     prevProducedRef.current = totalProduced;
     prevDefectiveRef.current = totalDefective;
   }, [totalProduced, totalDefective]);

@@ -85,7 +85,7 @@ export const SortingMinigame = memo(() => {
   // Efeito de som para o Combo
   useEffect(() => {
     if (consecutiveCorrectManualBoxes > 0 && consecutiveCorrectManualBoxes % 10 === 0) {
-      playSound('upgrade'); // Som de conquista para o combo!
+      playSound('buy'); // Som de conquista do combo
     }
   }, [consecutiveCorrectManualBoxes]);
 
@@ -242,7 +242,7 @@ const DraggableBox = memo(({ box, duration, onResolve, onTimeout }: { box: Pendi
         drag="x"
         dragConstraints={{ left: -300, right: 300 }}
         dragSnapToOrigin
-        onDragEnd={(event, info) => {
+        onDragEnd={(_, info) => {
           const x = info.point.x;
           // In a real robust app, we'd use element bounds, but dividing screen in 4 is quick for MVP.
           let droppedColor: BoxColor | null = null;
