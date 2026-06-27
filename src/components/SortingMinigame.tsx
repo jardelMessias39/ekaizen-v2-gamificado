@@ -17,6 +17,7 @@ const TUBE_STYLES: Record<BoxColor, string> = {
 interface PendingBox {
   id: number;
   color: BoxColor;
+  startX: number;
 }
 
 // High-frequency render component to prevent SortingMinigame from re-rendering every 100ms
@@ -62,7 +63,7 @@ const ThermometerOverlay = () => {
   );
 };
 
-export const SortingMinigame = () => {
+export const SortingMinigame = memo(() => {
   const { resolveBox, upgrades, isGameOver, isMinigamePaused } = useGameStore();
   const [boxes, setBoxes] = useState<PendingBox[]>([]);
   const [tubePositions, setTubePositions] = useState<BoxColor[]>([...COLORS]);
@@ -73,7 +74,9 @@ export const SortingMinigame = () => {
     setBoxes(prev => {
       if (prev.length >= 10) return prev;
       const randomColor = COLORS[Math.floor(Math.random() * COLORS.length)];
-      const newBox = { id: Date.now() + Math.random(), color: randomColor };
+      // Random X offset between -150 and +150 pixels from the center
+      const startX = Math.floor(Math.random() * 300) - 150;
+      const newBox = { id: Date.now() + Math.random(), color: randomColor, startX };
       return [...prev, newBox];
     });
   };
@@ -209,7 +212,7 @@ export const SortingMinigame = () => {
       
     </div>
   );
-};
+});
 
 // Internal component for the draggable box
 const DraggableBox = memo(({ box, duration, onResolve, onTimeout }: { box: PendingBox, duration: number, onResolve: Function, onTimeout: Function }) => {
@@ -229,8 +232,8 @@ const DraggableBox = memo(({ box, duration, onResolve, onTimeout }: { box: Pendi
 
   return (
     <motion.div
-      initial={{ y: 450, opacity: 0, scale: 0.5 }}
-      animate={{ y: -50, opacity: 1, scale: 1 }} // Float up slowly
+      initial={{ y: 450, x: box.startX, opacity: 0, scale: 0.5 }}
+      animate={{ y: -50, x: box.startX, opacity: 1, scale: 1 }} // Float up slowly keeping horizontal offset
       exit={{ opacity: 0, scale: 0 }}
       transition={{ y: { duration, ease: "linear" }, opacity: { duration: 0.2 } }}
       className="absolute left-1/2 -ml-8 z-30"
