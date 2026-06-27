@@ -11,6 +11,7 @@ interface GameStore extends GameState {
   tick: () => void;
   resolveBox: (isCorrect: boolean, boxColor?: string) => void;
   chooseBonus: (type: 'speed' | 'points', value: number, durationSeconds: number) => void;
+  completeTutorial: () => void;
   reset: () => void;
   acknowledgeGameOver: () => void;
   isHydrated: boolean;
@@ -164,6 +165,14 @@ export const useGameStore = create<GameStore>((set) => {
       });
     },
 
+    completeTutorial: () => {
+      set((state) => {
+        const newState = { ...state, hasSeenTutorial: true };
+        saveState(newState);
+        return newState;
+      });
+    },
+    
     reset: () => {
       const freshState = createInitialState();
       localStorage.removeItem(STORAGE_KEY);

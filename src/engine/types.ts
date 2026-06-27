@@ -29,6 +29,9 @@ export interface GameState {
   manualErrors: number;
   isGameOver: boolean;
   boxesSortedSinceLastMistake: number;
+  
+  // Tutorial
+  hasSeenTutorial: boolean;
 }
 
 export interface DerivedStats {

@@ -20,7 +20,7 @@ interface PendingBox {
 }
 
 export const SortingMinigame = () => {
-  const { resolveBox, upgrades, consecutiveCorrectManualBoxes, points, manualErrors } = useGameStore();
+  const { resolveBox, upgrades, consecutiveCorrectManualBoxes, points, manualErrors, isGameOver } = useGameStore();
   const [boxes, setBoxes] = useState<PendingBox[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -34,13 +34,30 @@ export const SortingMinigame = () => {
     });
   };
 
+  // Efeito de som para o Combo
   useEffect(() => {
+    if (consecutiveCorrectManualBoxes > 0 && consecutiveCorrectManualBoxes % 10 === 0) {
+      playSound('upgrade'); // Som de conquista para o combo!
+    }
+  }, [consecutiveCorrectManualBoxes]);
+
+  useEffect(() => {
+    // Se a fábrica tá interditada, não brota caixa.
+    if (isGameOver) return;
+    
     // Auto-spawn a box every 2 seconds to represent background production
     const interval = setInterval(() => {
       spawnBox();
     }, 2000);
     return () => clearInterval(interval);
-  }, []);
+  }, [isGameOver]);
+
+  // Limpar todas as caixas da tela se der Game Over
+  useEffect(() => {
+    if (isGameOver) {
+      setBoxes([]);
+    }
+  }, [isGameOver]);
 
   const handleBoxResolve = useCallback((id: number, boxColor: BoxColor, tubeColor: BoxColor) => {
     const isCorrect = boxColor === tubeColor;
@@ -54,15 +71,11 @@ export const SortingMinigame = () => {
   }, [resolveBox]);
 
   const handleBoxTimeout = useCallback((id: number) => {
-    // If it reaches top and hasn't been sorted, it's a defect
-    setBoxes(prev => {
-      const exists = prev.find(b => b.id === id);
-      if (exists) {
-        resolveBox(false);
-        playSound('error');
-      }
-      return prev.filter(b => b.id !== id);
-    });
+    // A caixa só dá timeout se o jogador não pegou (porque se pegar, o componente desmonta e limpa o timer)
+    resolveBox(false);
+    playSound('error');
+    
+    setBoxes(prev => prev.filter(b => b.id !== id));
   }, [resolveBox]);
 
   // The more 5S, the faster the boxes move up (less time to react, but faster points).
@@ -72,17 +85,22 @@ export const SortingMinigame = () => {
   const fallDuration = Math.max(2.0, 4.0 - speedBonus);
 
   return (
-    <div ref={containerRef} className="relative w-full h-[600px] border border-slate-700/50 rounded-2xl bg-slate-800/30 overflow-hidden flex flex-col justify-between p-4 shadow-[inset_0_0_50px_rgba(0,0,0,0.5)]">
+    <div ref={containerRef} className="relative w-full min-h-[500px] lg:h-full border border-slate-700/50 rounded-2xl bg-slate-800/30 overflow-hidden flex flex-col justify-between p-4 shadow-[inset_0_0_50px_rgba(0,0,0,0.5)]">
       
       {/* SCORE & COMBO OVERLAY */}
       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none opacity-20 z-0">
         <h2 className="text-8xl font-black text-slate-300">
           {Math.floor(points).toLocaleString('pt-BR')}
         </h2>
-        {consecutiveCorrectManualBoxes > 0 && (
-          <p className="text-3xl font-bold text-yellow-400 mt-2">
-            Combo x{consecutiveCorrectManualBoxes}
-          </p>
+        {consecutiveCorrectManualBoxes >= 10 && (
+          <motion.p 
+            key={consecutiveCorrectManualBoxes} // Force re-animate on change
+            initial={{ scale: 1.5, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            className="text-4xl font-black text-yellow-400 mt-4 drop-shadow-[0_0_20px_rgba(250,204,21,0.8)]"
+          >
+            🔥 COMBO x{consecutiveCorrectManualBoxes} 🔥
+          </motion.p>
         )}
       </div>
       

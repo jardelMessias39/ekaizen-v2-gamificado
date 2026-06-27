@@ -24,6 +24,8 @@ export const createInitialState = (): GameState => ({
   manualErrors: 0,
   isGameOver: false,
   boxesSortedSinceLastMistake: 0,
+  
+  hasSeenTutorial: false,
 });
 
 export const calculateUpgradeCost = (upgradeId: UpgradeId, currentPurchases: number): number => {

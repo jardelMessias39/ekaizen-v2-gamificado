@@ -20,7 +20,7 @@ export const UpgradeStore = () => {
   const { points, upgrades, buy } = useGameStore();
 
   return (
-    <div className="w-80 flex-shrink-0 bg-slate-800/50 backdrop-blur-md border-l border-slate-700 p-6 flex flex-col h-full overflow-y-auto">
+    <div className="w-full lg:w-80 flex-shrink-0 bg-slate-800/50 backdrop-blur-md border-t lg:border-t-0 lg:border-l border-slate-700 p-6 flex flex-col h-full lg:overflow-y-auto">
       <h2 className="text-xl font-bold mb-6 text-slate-100 flex items-center gap-2">
         <ArrowUpCircle className="text-emerald-400" />
         Melhorias
