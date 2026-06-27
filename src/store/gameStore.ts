@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { GameState, UpgradeId, DerivedStats } from '../engine/types';
-import { createInitialState, processTick, buyUpgrade, calculateDerivedStats, clickFactory } from '../engine/core';
+import { createInitialState, processTick, buyUpgrade, calculateDerivedStats, resolveManualBox, applyBonusChoice } from '../engine/core';
 import { toast } from 'sonner';
 import { playSound } from '../utils/audio';
 
@@ -9,7 +9,8 @@ interface GameStore extends GameState {
   history: Array<{ time: string; producao: number; defeitosPM: number; oee: number }>;
   buy: (upgradeId: UpgradeId) => void;
   tick: () => void;
-  manualClick: () => void;
+  resolveBox: (isCorrect: boolean) => void;
+  chooseBonus: (type: 'speed' | 'points', value: number, durationSeconds: number) => void;
   reset: () => void;
   isHydrated: boolean;
   setHydrated: () => void;
@@ -105,9 +106,10 @@ export const useGameStore = create<GameStore>((set) => {
       });
     },
 
-    manualClick: () => {
+    resolveBox: (isCorrect: boolean) => {
       set((state) => {
-        const newState = clickFactory(state);
+        const currentTimestamp = Date.now();
+        const newState = resolveManualBox(state, isCorrect, currentTimestamp);
         const finalState = {
           ...newState,
           stats: calculateDerivedStats(newState.upgrades),
@@ -115,6 +117,15 @@ export const useGameStore = create<GameStore>((set) => {
         checkAchievements(finalState, finalState.stats);
         saveState(finalState);
         return finalState;
+      });
+    },
+
+    chooseBonus: (type: 'speed' | 'points', value: number, durationSeconds: number) => {
+      set((state) => {
+        const currentTimestamp = Date.now();
+        const newState = applyBonusChoice(state, type, value, durationSeconds, currentTimestamp);
+        saveState(newState);
+        return newState;
       });
     },
 

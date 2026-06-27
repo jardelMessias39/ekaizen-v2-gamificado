@@ -8,6 +8,8 @@ export interface Upgrade {
   effectDesc: string;
 }
 
+export type BoxColor = 'red' | 'green' | 'blue' | 'yellow';
+
 export interface GameState {
   points: number;
   totalProduced: number;
@@ -16,6 +18,12 @@ export interface GameState {
   upgrades: Record<UpgradeId, number>;
   lastTickTimestamp: number;
   achievements: string[];
+  
+  // Novas variáveis para o minigame dos Tubos Coloridos
+  consecutiveCorrectManualBoxes: number;
+  lastMistakeTimestamp: number; // Para o bônus de 5 minutos
+  activeBonusUntil: number | null; // Timestamp de expiração do bônus de velocidade
+  bonusSpeedMultiplier: number; // 1.0 = normal, 1.02 = +2% bônus, etc.
 }
 
 export interface DerivedStats {

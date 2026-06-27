@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { createInitialState, processTick, buyUpgrade, calculateDerivedStats, calculateUpgradeCost } from './core';
+import { createInitialState, processTick, buyUpgrade, calculateDerivedStats, calculateUpgradeCost, resolveManualBox, applyBonusChoice } from './core';
 import type { GameState, UpgradeId } from './types';
 
 describe('Game Engine', () => {
@@ -103,6 +103,37 @@ describe('Game Engine', () => {
       expect(newState.totalGood).toBe(210);
       expect(newState.points).toBe(210);
       expect(newState.lastTickTimestamp).toBe(initialState.lastTickTimestamp + 300000);
+    });
+  });
+
+  describe('resolveManualBox & applyBonusChoice', () => {
+    it('should reward point and combo on correct box', () => {
+      const newState = resolveManualBox(initialState, true, Date.now());
+      expect(newState.consecutiveCorrectManualBoxes).toBe(1);
+      expect(newState.points).toBe(1);
+    });
+
+    it('should reset combo and register defect on incorrect box', () => {
+      initialState.consecutiveCorrectManualBoxes = 5;
+      const newState = resolveManualBox(initialState, false, Date.now());
+      expect(newState.consecutiveCorrectManualBoxes).toBe(0);
+      expect(newState.totalDefective).toBe(1);
+    });
+
+    it('should apply combo multipliers', () => {
+      initialState.consecutiveCorrectManualBoxes = 10;
+      const newState = resolveManualBox(initialState, true, Date.now());
+      expect(newState.points).toBe(2); // 10+ combo gives 2 points
+    });
+
+    it('should apply bonus choice correctly', () => {
+      const t = Date.now();
+      const statePts = applyBonusChoice(initialState, 'points', 50, 0, t);
+      expect(statePts.points).toBe(50);
+      
+      const stateSpd = applyBonusChoice(initialState, 'speed', 1.02, 20, t);
+      expect(stateSpd.bonusSpeedMultiplier).toBe(1.02);
+      expect(stateSpd.activeBonusUntil).toBe(t + 20000);
     });
   });
 });

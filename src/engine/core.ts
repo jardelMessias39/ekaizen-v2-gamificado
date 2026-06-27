@@ -16,6 +16,10 @@ export const createInitialState = (): GameState => ({
   },
   lastTickTimestamp: Date.now(),
   achievements: [],
+  consecutiveCorrectManualBoxes: 0,
+  lastMistakeTimestamp: Date.now(),
+  activeBonusUntil: null,
+  bonusSpeedMultiplier: 1.0,
 });
 
 export const calculateUpgradeCost = (upgradeId: UpgradeId, currentPurchases: number): number => {
@@ -92,23 +96,29 @@ export const buyUpgrade = (state: GameState, upgradeId: UpgradeId): GameState =>
 
 export const processTick = (state: GameState, currentTimestamp: number): GameState => {
   // Regra 2: Aba em background continua produzindo.
-  // Calculate how many ticks (seconds) have passed since last update
+  
+  let activeBonusUntil = state.activeBonusUntil;
+  let bonusSpeedMultiplier = state.bonusSpeedMultiplier;
+  
+  // Limpar bônus se expirou
+  if (activeBonusUntil && currentTimestamp > activeBonusUntil) {
+    activeBonusUntil = null;
+    bonusSpeedMultiplier = 1.0;
+  }
+
   const deltaSeconds = Math.floor((currentTimestamp - state.lastTickTimestamp) / 1000);
   
   if (deltaSeconds <= 0) {
-    return state; // Not enough time has passed
+    if (activeBonusUntil !== state.activeBonusUntil) {
+      return { ...state, activeBonusUntil, bonusSpeedMultiplier };
+    }
+    return state; 
   }
 
   const stats = calculateDerivedStats(state.upgrades);
+  const currentSpeed = stats.speed * bonusSpeedMultiplier;
   
-  // Calculate total items produced in this time block
-  // items = speed * seconds
-  const itemsProducedFloat = stats.speed * deltaSeconds;
-  
-  // In a real idle game, we might deal with floats or round down. Let's floor for discrete items, 
-  // but keep track of fractions if needed. For simplicity, let's round or just use float internally.
-  // Since "produção" is an indicator, 1.2 peças por segundo over 10 seconds is 12 peças.
-  // We'll just use the float values for accumulated points.
+  const itemsProducedFloat = currentSpeed * deltaSeconds;
   const itemsProduced = itemsProducedFloat;
   
   const defectiveItems = itemsProduced * stats.defectRate;
@@ -120,20 +130,55 @@ export const processTick = (state: GameState, currentTimestamp: number): GameSta
     totalProduced: state.totalProduced + itemsProduced,
     totalDefective: state.totalDefective + defectiveItems,
     totalGood: state.totalGood + goodItems,
-    lastTickTimestamp: state.lastTickTimestamp + (deltaSeconds * 1000), // Advance exactly the processed seconds
+    lastTickTimestamp: state.lastTickTimestamp + (deltaSeconds * 1000),
+    activeBonusUntil,
+    bonusSpeedMultiplier,
   };
 };
 
-export const clickFactory = (state: GameState): GameState => {
-  const stats = calculateDerivedStats(state.upgrades);
-  // manual clicks are subject to the same defect rate, evaluated individually
-  const isDefect = Math.random() < stats.defectRate;
+export const resolveManualBox = (state: GameState, isCorrect: boolean, currentTimestamp: number): GameState => {
+  let newConsecutive = state.consecutiveCorrectManualBoxes;
+  let newLastMistake = state.lastMistakeTimestamp;
+  
+  let gainedPoints = 0;
+  let gainedDefects = 0;
+  
+  if (isCorrect) {
+    newConsecutive++;
+    gainedPoints = 1;
+    if (newConsecutive >= 10) gainedPoints = 2; // Bônus de Combo
+    if (newConsecutive >= 30) gainedPoints = 3;
+    if (newConsecutive >= 50) gainedPoints = 5;
+  } else {
+    newConsecutive = 0;
+    newLastMistake = currentTimestamp;
+    gainedDefects = 1;
+  }
   
   return {
     ...state,
     totalProduced: state.totalProduced + 1,
-    totalDefective: state.totalDefective + (isDefect ? 1 : 0),
-    totalGood: state.totalGood + (isDefect ? 0 : 1),
-    points: state.points + (isDefect ? 0 : 1),
+    totalDefective: state.totalDefective + gainedDefects,
+    totalGood: state.totalGood + (isCorrect ? 1 : 0),
+    points: state.points + gainedPoints,
+    consecutiveCorrectManualBoxes: newConsecutive,
+    lastMistakeTimestamp: newLastMistake,
   };
+};
+
+export const applyBonusChoice = (state: GameState, type: 'speed' | 'points', value: number, durationSeconds: number, currentTimestamp: number): GameState => {
+  if (type === 'points') {
+    return {
+      ...state,
+      points: state.points + value,
+      lastMistakeTimestamp: currentTimestamp, // Reseta o timer para o próximo bônus
+    };
+  } else {
+    return {
+      ...state,
+      bonusSpeedMultiplier: value, // ex: 1.02
+      activeBonusUntil: currentTimestamp + (durationSeconds * 1000),
+      lastMistakeTimestamp: currentTimestamp,
+    };
+  }
 };
