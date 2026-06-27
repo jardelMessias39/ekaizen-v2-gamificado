@@ -22,6 +22,7 @@ interface PendingBox {
 export const SortingMinigame = () => {
   const { resolveBox, upgrades, consecutiveCorrectManualBoxes, points, manualErrors, isGameOver } = useGameStore();
   const [boxes, setBoxes] = useState<PendingBox[]>([]);
+  const [tubePositions, setTubePositions] = useState<BoxColor[]>([...COLORS]);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const spawnBox = () => {
@@ -57,6 +58,21 @@ export const SortingMinigame = () => {
     if (isGameOver) {
       setBoxes([]);
     }
+  }, [isGameOver]);
+
+  // Embaralhar tubos a cada 30 segundos (Aumentar a dificuldade)
+  useEffect(() => {
+    if (isGameOver) return;
+    
+    const shuffleInterval = setInterval(() => {
+      setTubePositions(prev => {
+        const newPos = [...prev];
+        return newPos.sort(() => Math.random() - 0.5);
+      });
+      playSound('click'); // Som de aviso da troca
+    }, 30000);
+    
+    return () => clearInterval(shuffleInterval);
   }, [isGameOver]);
 
   const handleBoxResolve = useCallback((id: number, boxColor: BoxColor, tubeColor: BoxColor) => {
@@ -120,14 +136,16 @@ export const SortingMinigame = () => {
       
       {/* TUBES AT THE TOP */}
       <div className="flex w-full justify-around z-20">
-        {COLORS.map((color) => {
+        {tubePositions.map((color) => {
           let pts = 10;
           if (color === 'green') pts = 20;
           if (color === 'blue') pts = 30;
           if (color === 'yellow') pts = 40;
           
           return (
-            <div 
+            <motion.div 
+              layout
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
               key={color} 
               id={`tube-${color}`}
               className={`w-24 h-28 rounded-b-2xl border-b-4 border-l-4 border-r-4 flex flex-col items-center justify-end pb-2 ${TUBE_STYLES[color]}`}
@@ -135,7 +153,7 @@ export const SortingMinigame = () => {
               <span className="text-[10px] font-black opacity-70 mb-1">+{pts} pts</span>
               <div className="w-12 h-4 bg-black/40 rounded-full blur-sm absolute top-4"></div>
               <Zap size={24} className="opacity-50" />
-            </div>
+            </motion.div>
           );
         })}
       </div>
