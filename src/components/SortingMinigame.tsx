@@ -60,7 +60,7 @@ export const SortingMinigame = () => {
     }
   }, [isGameOver]);
 
-  // Embaralhar tubos a cada 30 segundos (Aumentar a dificuldade)
+  // Embaralhar tubos a cada 2 minutos (Aumentar a dificuldade)
   useEffect(() => {
     if (isGameOver) return;
     
@@ -70,7 +70,7 @@ export const SortingMinigame = () => {
         return newPos.sort(() => Math.random() - 0.5);
       });
       playSound('click'); // Som de aviso da troca
-    }, 30000);
+    }, 120000); // 2 minutos (120000ms)
     
     return () => clearInterval(shuffleInterval);
   }, [isGameOver]);
