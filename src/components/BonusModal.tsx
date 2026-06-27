@@ -20,7 +20,7 @@ export const BonusModal = () => {
       }
     }, 1000);
     return () => clearInterval(interval);
-  }, [lastMistakeTimestamp, consecutiveCorrectManualBoxes, showModal]);
+  }, [lastMistakeTimestamp, boxesSortedSinceLastMistake, showModal]);
 
   const handleChoose = (type: 'speed' | 'points') => {
     const val = type === 'speed' ? 1.02 : (Math.random() > 0.5 ? 100 : 200);
