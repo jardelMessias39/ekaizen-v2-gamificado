@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BoxColor } from '../engine/types';
+import type { BoxColor } from '../engine/types';
 import { useGameStore } from '../store/gameStore';
 import { Hand, Box as BoxIcon, Zap } from 'lucide-react';
 import { playSound } from '../utils/audio';
@@ -20,16 +20,27 @@ interface PendingBox {
 }
 
 export const SortingMinigame = () => {
-  const { resolveBox, upgrades } = useGameStore();
+  const { resolveBox, upgrades, consecutiveCorrectManualBoxes, points } = useGameStore();
   const [boxes, setBoxes] = useState<PendingBox[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const spawnBox = () => {
-    playSound('click');
-    const randomColor = COLORS[Math.floor(Math.random() * COLORS.length)];
-    const newBox = { id: Date.now() + Math.random(), color: randomColor };
-    setBoxes(prev => [...prev, newBox]);
+    // Only spawn if we haven't flooded the screen (max 10 boxes at a time)
+    setBoxes(prev => {
+      if (prev.length >= 10) return prev;
+      const randomColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+      const newBox = { id: Date.now() + Math.random(), color: randomColor };
+      return [...prev, newBox];
+    });
   };
+
+  useEffect(() => {
+    // Auto-spawn a box every 2 seconds to represent background production
+    const interval = setInterval(() => {
+      spawnBox();
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleBoxResolve = (id: number, boxColor: BoxColor, tubeColor: BoxColor) => {
     const isCorrect = boxColor === tubeColor;
@@ -61,7 +72,19 @@ export const SortingMinigame = () => {
   const fallDuration = Math.max(2.0, 4.0 - speedBonus);
 
   return (
-    <div ref={containerRef} className="relative w-full h-[500px] border border-slate-700/50 rounded-2xl bg-slate-800/30 overflow-hidden flex flex-col justify-between p-4">
+    <div ref={containerRef} className="relative w-full h-[500px] border border-slate-700/50 rounded-2xl bg-slate-800/30 overflow-hidden flex flex-col justify-between p-4 shadow-[inset_0_0_50px_rgba(0,0,0,0.5)]">
+      
+      {/* SCORE & COMBO OVERLAY */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none opacity-20 z-0">
+        <h2 className="text-8xl font-black text-slate-300">
+          {Math.floor(points).toLocaleString('pt-BR')}
+        </h2>
+        {consecutiveCorrectManualBoxes > 0 && (
+          <p className="text-3xl font-bold text-yellow-400 mt-2">
+            Combo x{consecutiveCorrectManualBoxes}
+          </p>
+        )}
+      </div>
       
       {/* TUBES AT THE TOP */}
       <div className="flex w-full justify-around z-20">
@@ -95,7 +118,10 @@ export const SortingMinigame = () => {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={spawnBox}
+          onClick={() => {
+            playSound('click');
+            spawnBox();
+          }}
           className="group relative flex flex-col items-center justify-center w-32 h-32 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full shadow-[0_0_40px_rgba(99,102,241,0.6)] border-4 border-slate-900"
         >
           <div className="absolute inset-0 bg-white/20 group-hover:bg-transparent transition-colors rounded-full"></div>
