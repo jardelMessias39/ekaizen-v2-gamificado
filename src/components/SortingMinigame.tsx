@@ -153,7 +153,11 @@ export const SortingMinigame = memo(() => {
   const fallDuration = Math.max(2.0, 4.0 - speedBonus);
 
   return (
-    <div ref={containerRef} className="relative w-full min-h-[400px] lg:h-full border border-slate-700/50 rounded-2xl bg-slate-800/30 overflow-hidden flex flex-col justify-between p-2 md:p-4 shadow-[inset_0_0_50px_rgba(0,0,0,0.5)] touch-pan-y">
+    <div 
+      ref={containerRef} 
+      onContextMenu={(e) => e.preventDefault()}
+      className="relative w-full min-h-[400px] lg:h-full border border-slate-700/50 rounded-2xl bg-slate-800/30 overflow-hidden flex flex-col justify-between p-2 md:p-4 shadow-[inset_0_0_50px_rgba(0,0,0,0.5)] touch-pan-y"
+    >
       
       {/* SCORE & COMBO OVERLAY */}
       <ScoreOverlay />
@@ -274,6 +278,8 @@ const DraggableBox = memo(({ box, duration, onResolve, onTimeout }: { box: Pendi
         }}
         whileTap={{ scale: 0.9 }}
         onContextMenu={(e) => e.preventDefault()}
+        onDragStart={(e) => e.preventDefault()}
+        style={{ WebkitUserDrag: 'none' } as React.CSSProperties}
         draggable={false}
         className={`cursor-grab active:cursor-grabbing flex flex-col items-center p-3 rounded-xl bg-slate-800 border-2 select-none touch-none ${
           box.color === 'red' ? 'border-red-500 text-red-500' :
