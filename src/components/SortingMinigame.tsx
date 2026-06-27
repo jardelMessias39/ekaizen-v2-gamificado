@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { BoxColor } from '../engine/types';
 import { useGameStore } from '../store/gameStore';
@@ -42,7 +42,7 @@ export const SortingMinigame = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleBoxResolve = (id: number, boxColor: BoxColor, tubeColor: BoxColor) => {
+  const handleBoxResolve = useCallback((id: number, boxColor: BoxColor, tubeColor: BoxColor) => {
     const isCorrect = boxColor === tubeColor;
     resolveBox(isCorrect, boxColor);
     if (isCorrect) {
@@ -51,9 +51,9 @@ export const SortingMinigame = () => {
       playSound('error');
     }
     setBoxes(prev => prev.filter(b => b.id !== id));
-  };
+  }, [resolveBox]);
 
-  const handleBoxTimeout = (id: number) => {
+  const handleBoxTimeout = useCallback((id: number) => {
     // If it reaches top and hasn't been sorted, it's a defect
     setBoxes(prev => {
       const exists = prev.find(b => b.id === id);
@@ -63,7 +63,7 @@ export const SortingMinigame = () => {
       }
       return prev.filter(b => b.id !== id);
     });
-  };
+  }, [resolveBox]);
 
   // The more 5S, the faster the boxes move up (less time to react, but faster points).
   // Wait, if it's faster, it's harder! We should give more points?
@@ -159,13 +159,18 @@ export const SortingMinigame = () => {
 // Internal component for the draggable box
 const DraggableBox = ({ box, duration, onResolve, onTimeout }: { box: PendingBox, duration: number, onResolve: Function, onTimeout: Function }) => {
   
+  const timeoutRef = useRef(onTimeout);
+  useEffect(() => {
+    timeoutRef.current = onTimeout;
+  }, [onTimeout]);
+
   useEffect(() => {
     // 1.5s tolerance at the top before it vanishes
     const timer = setTimeout(() => {
-      onTimeout(box.id);
+      timeoutRef.current(box.id);
     }, (duration + 1.5) * 1000);
     return () => clearTimeout(timer);
-  }, [box.id, duration, onTimeout]);
+  }, [box.id, duration]);
 
   return (
     <motion.div

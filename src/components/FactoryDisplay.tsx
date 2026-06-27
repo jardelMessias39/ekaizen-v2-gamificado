@@ -103,8 +103,8 @@ export const FactoryDisplay = () => {
         </div>
       </div>
 
-      {/* IA Bottleneck Diagnostic (Floating top-left) */}
-      <div className="absolute top-28 left-8 z-30 w-full max-w-sm pointer-events-none">
+      {/* IA Bottleneck Diagnostic (Floating bottom-left) */}
+      <div className="absolute bottom-6 left-6 z-30 w-full max-w-sm pointer-events-none">
         <div className="pointer-events-auto">
           <DiagnosticPanel />
         </div>
