@@ -23,7 +23,7 @@ export const OnboardingModal = () => {
         <motion.div
           initial={{ scale: 0.8, y: 20 }}
           animate={{ scale: 1, y: 0 }}
-          className="bg-slate-900 border-2 border-indigo-500/50 rounded-2xl max-w-2xl w-full text-slate-200 shadow-2xl overflow-hidden"
+          className="bg-slate-900 border-2 border-indigo-500/50 rounded-2xl max-w-2xl w-full text-slate-200 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
         >
           <div className="bg-indigo-600 p-6 text-center">
             <h2 className="text-3xl font-black text-white flex items-center justify-center gap-3">
@@ -32,7 +32,7 @@ export const OnboardingModal = () => {
             </h2>
           </div>
           
-          <div className="p-8">
+          <div className="p-6 md:p-8 overflow-y-auto">
             <p className="text-lg mb-6 leading-relaxed text-slate-300">
               Bem-vindo ao simulador de linha de produção <strong>Kaizen</strong>. Este não é apenas um jogo, é um teste de habilidades reais exigidas no mundo corporativo!
             </p>
