@@ -22,7 +22,8 @@ interface PendingBox {
 
 // High-frequency render component to prevent SortingMinigame from re-rendering every 100ms
 const ScoreOverlay = () => {
-  const { points, consecutiveCorrectManualBoxes } = useGameStore();
+  const points = useGameStore(state => state.points);
+  const consecutiveCorrectManualBoxes = useGameStore(state => state.consecutiveCorrectManualBoxes);
   
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none opacity-20 z-0">
@@ -45,7 +46,7 @@ const ScoreOverlay = () => {
 
 // Isolate the manual error thermometer to prevent parent re-renders
 const ThermometerOverlay = () => {
-  const { manualErrors } = useGameStore();
+  const manualErrors = useGameStore(state => state.manualErrors);
   
   return (
     <div className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-[400px] bg-slate-900 border-2 border-slate-700 rounded-full flex flex-col-reverse p-1 gap-1 z-20">
@@ -64,7 +65,11 @@ const ThermometerOverlay = () => {
 };
 
 export const SortingMinigame = memo(() => {
-  const { resolveBox, upgrades, isGameOver, isMinigamePaused } = useGameStore();
+  const resolveBox = useGameStore(state => state.resolveBox);
+  const upgrades = useGameStore(state => state.upgrades);
+  const isGameOver = useGameStore(state => state.isGameOver);
+  const isMinigamePaused = useGameStore(state => state.isMinigamePaused);
+  
   const [boxes, setBoxes] = useState<PendingBox[]>([]);
   const [tubePositions, setTubePositions] = useState<BoxColor[]>([...COLORS]);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -81,7 +86,7 @@ export const SortingMinigame = memo(() => {
     });
   };
 
-  const { consecutiveCorrectManualBoxes } = useGameStore();
+  const consecutiveCorrectManualBoxes = useGameStore(state => state.consecutiveCorrectManualBoxes);
   // Efeito de som para o Combo
   useEffect(() => {
     if (consecutiveCorrectManualBoxes > 0 && consecutiveCorrectManualBoxes % 10 === 0) {
