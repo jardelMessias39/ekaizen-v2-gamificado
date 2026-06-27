@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FactoryDisplay } from './components/FactoryDisplay';
 import { UpgradeStore } from './components/UpgradeStore';
 import { Dashboard } from './components/Dashboard';
