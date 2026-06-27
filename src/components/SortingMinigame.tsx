@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { BoxColor } from '../engine/types';
 import { useGameStore } from '../store/gameStore';
@@ -19,8 +19,51 @@ interface PendingBox {
   color: BoxColor;
 }
 
+// High-frequency render component to prevent SortingMinigame from re-rendering every 100ms
+const ScoreOverlay = () => {
+  const { points, consecutiveCorrectManualBoxes } = useGameStore();
+  
+  return (
+    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none opacity-20 z-0">
+      <h2 className="text-8xl font-black text-slate-300">
+        {Math.floor(points).toLocaleString('pt-BR')}
+      </h2>
+      {consecutiveCorrectManualBoxes >= 10 && (
+        <motion.p 
+          key={consecutiveCorrectManualBoxes} // Force re-animate on change
+          initial={{ scale: 1.5, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          className="text-4xl font-black text-yellow-400 mt-4 drop-shadow-[0_0_20px_rgba(250,204,21,0.8)]"
+        >
+          🔥 COMBO x{consecutiveCorrectManualBoxes} 🔥
+        </motion.p>
+      )}
+    </div>
+  );
+};
+
+// Isolate the manual error thermometer to prevent parent re-renders
+const ThermometerOverlay = () => {
+  const { manualErrors } = useGameStore();
+  
+  return (
+    <div className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-[400px] bg-slate-900 border-2 border-slate-700 rounded-full flex flex-col-reverse p-1 gap-1 z-20">
+      {Array.from({ length: 10 }).map((_, i) => (
+        <div 
+          key={i} 
+          className={`flex-1 rounded-full transition-colors duration-300 ${
+            i < manualErrors 
+              ? (i >= 8 ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]' : 'bg-orange-500') 
+              : 'bg-slate-800'
+          }`}
+        />
+      ))}
+    </div>
+  );
+};
+
 export const SortingMinigame = () => {
-  const { resolveBox, upgrades, consecutiveCorrectManualBoxes, points, manualErrors, isGameOver } = useGameStore();
+  const { resolveBox, upgrades, isGameOver } = useGameStore();
   const [boxes, setBoxes] = useState<PendingBox[]>([]);
   const [tubePositions, setTubePositions] = useState<BoxColor[]>([...COLORS]);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -35,6 +78,7 @@ export const SortingMinigame = () => {
     });
   };
 
+  const { consecutiveCorrectManualBoxes } = useGameStore();
   // Efeito de som para o Combo
   useEffect(() => {
     if (consecutiveCorrectManualBoxes > 0 && consecutiveCorrectManualBoxes % 10 === 0) {
@@ -104,35 +148,10 @@ export const SortingMinigame = () => {
     <div ref={containerRef} className="relative w-full min-h-[500px] lg:h-full border border-slate-700/50 rounded-2xl bg-slate-800/30 overflow-hidden flex flex-col justify-between p-4 shadow-[inset_0_0_50px_rgba(0,0,0,0.5)]">
       
       {/* SCORE & COMBO OVERLAY */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none opacity-20 z-0">
-        <h2 className="text-8xl font-black text-slate-300">
-          {Math.floor(points).toLocaleString('pt-BR')}
-        </h2>
-        {consecutiveCorrectManualBoxes >= 10 && (
-          <motion.p 
-            key={consecutiveCorrectManualBoxes} // Force re-animate on change
-            initial={{ scale: 1.5, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            className="text-4xl font-black text-yellow-400 mt-4 drop-shadow-[0_0_20px_rgba(250,204,21,0.8)]"
-          >
-            🔥 COMBO x{consecutiveCorrectManualBoxes} 🔥
-          </motion.p>
-        )}
-      </div>
+      <ScoreOverlay />
       
       {/* MANUAL ERROR THERMOMETER */}
-      <div className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-[400px] bg-slate-900 border-2 border-slate-700 rounded-full flex flex-col-reverse p-1 gap-1 z-20">
-        {Array.from({ length: 10 }).map((_, i) => (
-          <div 
-            key={i} 
-            className={`flex-1 rounded-full transition-colors duration-300 ${
-              i < manualErrors 
-                ? (i >= 8 ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]' : 'bg-orange-500') 
-                : 'bg-slate-800'
-            }`}
-          />
-        ))}
-      </div>
+      <ThermometerOverlay />
       
       {/* TUBES AT THE TOP */}
       <div className="flex w-full justify-around z-20">
@@ -193,7 +212,7 @@ export const SortingMinigame = () => {
 };
 
 // Internal component for the draggable box
-const DraggableBox = ({ box, duration, onResolve, onTimeout }: { box: PendingBox, duration: number, onResolve: Function, onTimeout: Function }) => {
+const DraggableBox = memo(({ box, duration, onResolve, onTimeout }: { box: PendingBox, duration: number, onResolve: Function, onTimeout: Function }) => {
   
   const timeoutRef = useRef(onTimeout);
   useEffect(() => {
@@ -252,4 +271,4 @@ const DraggableBox = ({ box, duration, onResolve, onTimeout }: { box: PendingBox
       </motion.div>
     </motion.div>
   );
-};
+});
