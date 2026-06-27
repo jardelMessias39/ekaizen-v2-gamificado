@@ -9,7 +9,7 @@ interface GameStore extends GameState {
   history: Array<{ time: string; producao: number; defeitosPM: number; oee: number }>;
   buy: (upgradeId: UpgradeId) => void;
   tick: () => void;
-  resolveBox: (isCorrect: boolean) => void;
+  resolveBox: (isCorrect: boolean, boxColor?: string) => void;
   chooseBonus: (type: 'speed' | 'points', value: number, durationSeconds: number) => void;
   reset: () => void;
   isHydrated: boolean;
@@ -106,10 +106,10 @@ export const useGameStore = create<GameStore>((set) => {
       });
     },
 
-    resolveBox: (isCorrect: boolean) => {
+    resolveBox: (isCorrect: boolean, boxColor?: string) => {
       set((state) => {
         const currentTimestamp = Date.now();
-        const newState = resolveManualBox(state, isCorrect, currentTimestamp);
+        const newState = resolveManualBox(state, isCorrect, currentTimestamp, boxColor);
         const finalState = {
           ...newState,
           stats: calculateDerivedStats(newState.upgrades),

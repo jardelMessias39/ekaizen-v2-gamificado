@@ -97,8 +97,8 @@ export const buyUpgrade = (state: GameState, upgradeId: UpgradeId): GameState =>
 export const processTick = (state: GameState, currentTimestamp: number): GameState => {
   // Regra 2: Aba em background continua produzindo.
   
-  let activeBonusUntil = state.activeBonusUntil;
-  let bonusSpeedMultiplier = state.bonusSpeedMultiplier;
+  let activeBonusUntil = state.activeBonusUntil || null;
+  let bonusSpeedMultiplier = state.bonusSpeedMultiplier || 1.0;
   
   // Limpar bônus se expirou
   if (activeBonusUntil && currentTimestamp > activeBonusUntil) {
@@ -136,19 +136,25 @@ export const processTick = (state: GameState, currentTimestamp: number): GameSta
   };
 };
 
-export const resolveManualBox = (state: GameState, isCorrect: boolean, currentTimestamp: number): GameState => {
-  let newConsecutive = state.consecutiveCorrectManualBoxes;
-  let newLastMistake = state.lastMistakeTimestamp;
+export const resolveManualBox = (state: GameState, isCorrect: boolean, currentTimestamp: number, boxColor?: string): GameState => {
+  let newConsecutive = state.consecutiveCorrectManualBoxes || 0;
+  let newLastMistake = state.lastMistakeTimestamp || currentTimestamp;
   
   let gainedPoints = 0;
   let gainedDefects = 0;
   
   if (isCorrect) {
     newConsecutive++;
-    gainedPoints = 1;
-    if (newConsecutive >= 10) gainedPoints = 2; // Bônus de Combo
-    if (newConsecutive >= 30) gainedPoints = 3;
-    if (newConsecutive >= 50) gainedPoints = 5;
+    // Diferent colors give different base points
+    let basePoints = 10;
+    if (boxColor === 'green') basePoints = 20;
+    if (boxColor === 'blue') basePoints = 30;
+    if (boxColor === 'yellow') basePoints = 40;
+
+    gainedPoints = basePoints;
+    if (newConsecutive >= 10) gainedPoints = basePoints * 2; // Bônus de Combo
+    if (newConsecutive >= 30) gainedPoints = basePoints * 3;
+    if (newConsecutive >= 50) gainedPoints = basePoints * 5;
   } else {
     newConsecutive = 0;
     newLastMistake = currentTimestamp;
@@ -157,10 +163,10 @@ export const resolveManualBox = (state: GameState, isCorrect: boolean, currentTi
   
   return {
     ...state,
-    totalProduced: state.totalProduced + 1,
-    totalDefective: state.totalDefective + gainedDefects,
-    totalGood: state.totalGood + (isCorrect ? 1 : 0),
-    points: state.points + gainedPoints,
+    totalProduced: (state.totalProduced || 0) + 1,
+    totalDefective: (state.totalDefective || 0) + gainedDefects,
+    totalGood: (state.totalGood || 0) + (isCorrect ? 1 : 0),
+    points: (state.points || 0) + gainedPoints,
     consecutiveCorrectManualBoxes: newConsecutive,
     lastMistakeTimestamp: newLastMistake,
   };

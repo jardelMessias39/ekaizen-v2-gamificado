@@ -44,11 +44,11 @@ export const SortingMinigame = () => {
 
   const handleBoxResolve = (id: number, boxColor: BoxColor, tubeColor: BoxColor) => {
     const isCorrect = boxColor === tubeColor;
-    resolveBox(isCorrect);
+    resolveBox(isCorrect, boxColor);
     if (isCorrect) {
       playSound('buy');
     } else {
-      playSound('error'); // Assume this exists or fallback to nothing
+      playSound('error');
     }
     setBoxes(prev => prev.filter(b => b.id !== id));
   };
@@ -72,7 +72,7 @@ export const SortingMinigame = () => {
   const fallDuration = Math.max(2.0, 4.0 - speedBonus);
 
   return (
-    <div ref={containerRef} className="relative w-full h-[500px] border border-slate-700/50 rounded-2xl bg-slate-800/30 overflow-hidden flex flex-col justify-between p-4 shadow-[inset_0_0_50px_rgba(0,0,0,0.5)]">
+    <div ref={containerRef} className="relative w-full h-[600px] border border-slate-700/50 rounded-2xl bg-slate-800/30 overflow-hidden flex flex-col justify-between p-4 shadow-[inset_0_0_50px_rgba(0,0,0,0.5)]">
       
       {/* SCORE & COMBO OVERLAY */}
       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none opacity-20 z-0">
@@ -88,16 +88,24 @@ export const SortingMinigame = () => {
       
       {/* TUBES AT THE TOP */}
       <div className="flex w-full justify-around z-20">
-        {COLORS.map((color) => (
-          <div 
-            key={color} 
-            id={`tube-${color}`}
-            className={`w-20 h-24 rounded-b-2xl border-b-4 border-l-4 border-r-4 flex items-end justify-center pb-4 ${TUBE_STYLES[color]}`}
-          >
-            <div className="w-12 h-4 bg-black/40 rounded-full blur-sm absolute top-4"></div>
-            <Zap size={24} className="opacity-50" />
-          </div>
-        ))}
+        {COLORS.map((color) => {
+          let pts = 10;
+          if (color === 'green') pts = 20;
+          if (color === 'blue') pts = 30;
+          if (color === 'yellow') pts = 40;
+          
+          return (
+            <div 
+              key={color} 
+              id={`tube-${color}`}
+              className={`w-24 h-28 rounded-b-2xl border-b-4 border-l-4 border-r-4 flex flex-col items-center justify-end pb-2 ${TUBE_STYLES[color]}`}
+            >
+              <span className="text-[10px] font-black opacity-70 mb-1">+{pts} pts</span>
+              <div className="w-12 h-4 bg-black/40 rounded-full blur-sm absolute top-4"></div>
+              <Zap size={24} className="opacity-50" />
+            </div>
+          );
+        })}
       </div>
 
       {/* FLOATING BOXES */}
@@ -146,45 +154,46 @@ const DraggableBox = ({ box, duration, onResolve, onTimeout }: { box: PendingBox
 
   return (
     <motion.div
-      drag
-      dragConstraints={{ left: -200, right: 200, top: -400, bottom: 50 }}
-      dragSnapToOrigin
-      onDragEnd={(event, info) => {
-        // Find which tube we dropped it on based on X coordinate
-        // This is a simple approximation. Screen is divided in 4 columns.
-        const x = info.point.x;
-        const w = window.innerWidth;
-        // In a real robust app, we'd use element bounds, but dividing screen in 4 is quick for MVP.
-        // Actually, we can get the tube elements by ID!
-        let droppedColor: BoxColor | null = null;
-        for (const c of COLORS) {
-          const el = document.getElementById(`tube-${c}`);
-          if (el) {
-            const rect = el.getBoundingClientRect();
-            // Allow a generous drop zone
-            if (x >= rect.left - 40 && x <= rect.right + 40 && info.point.y <= rect.bottom + 100) {
-              droppedColor = c;
-              break;
-            }
-          }
-        }
-        
-        if (droppedColor) {
-          onResolve(box.id, box.color, droppedColor);
-        }
-      }}
-      initial={{ y: 350, opacity: 0, scale: 0.5, x: 0 }}
+      initial={{ y: 450, opacity: 0, scale: 0.5 }}
       animate={{ y: -50, opacity: 1, scale: 1 }} // Float up slowly
       exit={{ opacity: 0, scale: 0 }}
       transition={{ y: { duration, ease: "linear" }, opacity: { duration: 0.2 } }}
-      className={`absolute left-1/2 -ml-8 z-30 cursor-grab active:cursor-grabbing flex flex-col items-center p-3 rounded-xl bg-slate-800 border-2 ${
-        box.color === 'red' ? 'border-red-500 text-red-500' :
-        box.color === 'green' ? 'border-emerald-500 text-emerald-500' :
-        box.color === 'blue' ? 'border-blue-500 text-blue-500' :
-        'border-yellow-400 text-yellow-400'
-      }`}
+      className="absolute left-1/2 -ml-8 z-30"
     >
-      <BoxIcon size={32} />
+      <motion.div
+        drag="x"
+        dragConstraints={{ left: -300, right: 300 }}
+        dragSnapToOrigin
+        onDragEnd={(event, info) => {
+          const x = info.point.x;
+          // In a real robust app, we'd use element bounds, but dividing screen in 4 is quick for MVP.
+          let droppedColor: BoxColor | null = null;
+          for (const c of COLORS) {
+            const el = document.getElementById(`tube-${c}`);
+            if (el) {
+              const rect = el.getBoundingClientRect();
+              // Allow a generous drop zone horizontally. The Y is handled by the wrapper.
+              if (x >= rect.left - 60 && x <= rect.right + 60) {
+                droppedColor = c;
+                break;
+              }
+            }
+          }
+          
+          if (droppedColor) {
+            onResolve(box.id, box.color, droppedColor);
+          }
+        }}
+        whileTap={{ scale: 0.9 }}
+        className={`cursor-grab active:cursor-grabbing flex flex-col items-center p-3 rounded-xl bg-slate-800 border-2 ${
+          box.color === 'red' ? 'border-red-500 text-red-500' :
+          box.color === 'green' ? 'border-emerald-500 text-emerald-500' :
+          box.color === 'blue' ? 'border-blue-500 text-blue-500' :
+          'border-yellow-400 text-yellow-400'
+        }`}
+      >
+        <BoxIcon size={32} />
+      </motion.div>
     </motion.div>
   );
 };

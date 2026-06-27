@@ -102,9 +102,11 @@ export const FactoryDisplay = () => {
         </div>
       </div>
 
-      {/* IA Bottleneck Diagnostic (Floating mid-left) */}
-      <div className="relative z-10 w-full max-w-lg mb-auto mt-16 ml-4">
-        <DiagnosticPanel />
+      {/* IA Bottleneck Diagnostic (Floating top-left) */}
+      <div className="absolute top-28 left-8 z-30 w-full max-w-sm pointer-events-none">
+        <div className="pointer-events-auto">
+          <DiagnosticPanel />
+        </div>
       </div>
 
       {/* Sorting Minigame replacing the old manual button */}
@@ -112,41 +114,7 @@ export const FactoryDisplay = () => {
         <SortingMinigame />
       </div>
 
-      {/* Animation Area - The Factory Floor */}
-      <div className="absolute bottom-0 left-0 w-full h-32 border-b-4 border-slate-700 flex items-end justify-center pointer-events-none">
-        <div className="absolute bottom-0 w-full h-12 bg-slate-800/50 border-t border-slate-700"></div>
-        
-        <AnimatePresence>
-          {items.map((item) => (
-            <motion.div
-              key={item.id}
-              initial={{ y: 20, opacity: 0, scale: 0.5 }}
-              animate={{ 
-                y: -600, // Float high up the screen
-                opacity: [0, 1, 1, 0],
-                scale: [0.5, 1, 1.2, 1],
-                rotate: item.isDefect ? [0, 180] : 0 
-              }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 3.5, ease: "easeOut" }}
-              className="absolute bottom-6 z-30 pointer-events-none"
-              style={{ left: `${item.x}%` }}
-            >
-              {item.isDefect ? (
-                <div className="flex flex-col items-center text-red-500">
-                  <AlertCircle size={28} />
-                  <span className="text-xs font-bold mt-1">-0</span>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.8)]">
-                  <Box size={32} />
-                  <span className="text-xs font-bold mt-1">+1</span>
-                </div>
-              )}
-            </motion.div>
-          ))}
-        </AnimatePresence>
-      </div>
+      {/* Empty block, old floor was removed */}
 
       <BonusModal />
     </div>
