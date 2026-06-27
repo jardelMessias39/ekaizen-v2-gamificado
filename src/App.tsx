@@ -12,12 +12,21 @@ import { useGameStore } from './store/gameStore';
 function App() {
   useGameLoop();
   const [showRanking, setShowRanking] = useState(false);
+  const [isPageHidden, setIsPageHidden] = useState(false);
   const setMinigamePaused = useGameStore(state => state.setMinigamePaused);
 
-  // Pause minigame when ranking is open
   useEffect(() => {
-    setMinigamePaused(showRanking);
-  }, [showRanking, setMinigamePaused]);
+    const handleVisibilityChange = () => {
+      setIsPageHidden(document.hidden);
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
+  // Pause minigame when ranking is open or page is hidden
+  useEffect(() => {
+    setMinigamePaused(showRanking || isPageHidden);
+  }, [showRanking, isPageHidden, setMinigamePaused]);
 
   return (
     <div className="flex flex-col h-screen w-full bg-slate-900 overflow-hidden font-sans text-slate-200">
