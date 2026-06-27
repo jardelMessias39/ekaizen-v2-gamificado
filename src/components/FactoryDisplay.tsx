@@ -3,8 +3,9 @@ import { useGameStore } from '../store/gameStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Box, AlertCircle, Hand } from 'lucide-react';
 import { formatNumber, formatPercentage } from '../utils/formatters';
-import { playSound } from '../utils/audio';
 import { DiagnosticPanel } from './DiagnosticPanel';
+import { SortingMinigame } from './SortingMinigame';
+import { BonusModal } from './BonusModal';
 
 interface FloatingItem {
   id: number;
@@ -13,7 +14,7 @@ interface FloatingItem {
 }
 
 export const FactoryDisplay = () => {
-  const { points, stats, totalProduced, totalDefective, manualClick } = useGameStore();
+  const { points, stats, totalProduced, totalDefective, consecutiveCorrectManualBoxes } = useGameStore();
   const [items, setItems] = useState<FloatingItem[]>([]);
   const prevProducedRef = useRef(totalProduced);
   const prevDefectiveRef = useRef(totalDefective);
@@ -67,6 +68,11 @@ export const FactoryDisplay = () => {
             <span className="text-emerald-400 font-black px-2 py-0.5 rounded-full bg-emerald-400/10 border border-emerald-400/20 text-sm shadow-[0_0_10px_rgba(52,211,153,0.2)]">
               +{formatNumber(pps)} PPS
             </span>
+            {consecutiveCorrectManualBoxes >= 10 && (
+              <span className="ml-2 text-yellow-400 font-black px-2 py-0.5 rounded-full bg-yellow-400/10 border border-yellow-400/20 text-sm shadow-[0_0_10px_rgba(250,204,21,0.2)] animate-pulse">
+                🔥 COMBO x{consecutiveCorrectManualBoxes}
+              </span>
+            )}
           </div>
         </div>
 
@@ -101,26 +107,9 @@ export const FactoryDisplay = () => {
         <DiagnosticPanel />
       </div>
 
-      {/* Manual Click Button (DRAGGABLE) */}
-      <div className="relative z-20 flex justify-center w-full my-auto">
-        <motion.button
-          drag
-          dragConstraints={{ left: -300, right: 300, top: -150, bottom: 50 }}
-          dragElastic={0.1}
-          dragMomentum={false}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => {
-            playSound('click');
-            manualClick();
-            window.dispatchEvent(new Event('manual-click'));
-          }}
-          className="group relative flex flex-col items-center justify-center w-36 h-36 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full shadow-[0_0_40px_rgba(99,102,241,0.6)] border-4 border-slate-900 overflow-hidden cursor-grab active:cursor-grabbing"
-        >
-          <div className="absolute inset-0 bg-white/20 group-hover:bg-transparent transition-colors pointer-events-none"></div>
-          <Hand size={40} className="text-white mb-1 pointer-events-none" />
-          <span className="text-white font-bold tracking-widest uppercase text-xs pointer-events-none">Produzir</span>
-        </motion.button>
+      {/* Sorting Minigame replacing the old manual button */}
+      <div className="relative z-20 flex justify-center w-full my-auto max-w-2xl self-center">
+        <SortingMinigame />
       </div>
 
       {/* Animation Area - The Factory Floor */}
@@ -158,7 +147,8 @@ export const FactoryDisplay = () => {
           ))}
         </AnimatePresence>
       </div>
-      
+
+      <BonusModal />
     </div>
   );
 };

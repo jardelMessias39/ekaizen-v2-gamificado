@@ -1,0 +1,164 @@
+import { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { BoxColor } from '../engine/types';
+import { useGameStore } from '../store/gameStore';
+import { Hand, Box as BoxIcon, Zap } from 'lucide-react';
+import { playSound } from '../utils/audio';
+
+const COLORS: BoxColor[] = ['red', 'green', 'blue', 'yellow'];
+
+const TUBE_STYLES: Record<BoxColor, string> = {
+  red: 'border-red-500 bg-red-500/20 text-red-400 shadow-[0_0_15px_rgba(239,68,68,0.5)]',
+  green: 'border-emerald-500 bg-emerald-500/20 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.5)]',
+  blue: 'border-blue-500 bg-blue-500/20 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.5)]',
+  yellow: 'border-yellow-400 bg-yellow-400/20 text-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)]'
+};
+
+interface PendingBox {
+  id: number;
+  color: BoxColor;
+}
+
+export const SortingMinigame = () => {
+  const { resolveBox, upgrades } = useGameStore();
+  const [boxes, setBoxes] = useState<PendingBox[]>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const spawnBox = () => {
+    playSound('click');
+    const randomColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+    const newBox = { id: Date.now() + Math.random(), color: randomColor };
+    setBoxes(prev => [...prev, newBox]);
+  };
+
+  const handleBoxResolve = (id: number, boxColor: BoxColor, tubeColor: BoxColor) => {
+    const isCorrect = boxColor === tubeColor;
+    resolveBox(isCorrect);
+    if (isCorrect) {
+      playSound('buy');
+    } else {
+      playSound('error'); // Assume this exists or fallback to nothing
+    }
+    setBoxes(prev => prev.filter(b => b.id !== id));
+  };
+
+  const handleBoxTimeout = (id: number) => {
+    // If it reaches top and hasn't been sorted, it's a defect
+    setBoxes(prev => {
+      const exists = prev.find(b => b.id === id);
+      if (exists) {
+        resolveBox(false);
+        playSound('error');
+      }
+      return prev.filter(b => b.id !== id);
+    });
+  };
+
+  // The more 5S, the faster the boxes move up (less time to react, but faster points).
+  // Wait, if it's faster, it's harder! We should give more points?
+  // Let's keep it fixed at 4 seconds for now, maybe minus 100ms per 5S.
+  const speedBonus = (upgrades['5s'] || 0) * 0.2;
+  const fallDuration = Math.max(2.0, 4.0 - speedBonus);
+
+  return (
+    <div ref={containerRef} className="relative w-full h-[500px] border border-slate-700/50 rounded-2xl bg-slate-800/30 overflow-hidden flex flex-col justify-between p-4">
+      
+      {/* TUBES AT THE TOP */}
+      <div className="flex w-full justify-around z-20">
+        {COLORS.map((color) => (
+          <div 
+            key={color} 
+            id={`tube-${color}`}
+            className={`w-20 h-24 rounded-b-2xl border-b-4 border-l-4 border-r-4 flex items-end justify-center pb-4 ${TUBE_STYLES[color]}`}
+          >
+            <div className="w-12 h-4 bg-black/40 rounded-full blur-sm absolute top-4"></div>
+            <Zap size={24} className="opacity-50" />
+          </div>
+        ))}
+      </div>
+
+      {/* FLOATING BOXES */}
+      <AnimatePresence>
+        {boxes.map(box => (
+          <DraggableBox 
+            key={box.id} 
+            box={box} 
+            duration={fallDuration} 
+            onResolve={handleBoxResolve}
+            onTimeout={handleBoxTimeout}
+          />
+        ))}
+      </AnimatePresence>
+
+      {/* BUTTON AT THE BOTTOM */}
+      <div className="flex w-full justify-center z-20 pb-4">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={spawnBox}
+          className="group relative flex flex-col items-center justify-center w-32 h-32 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full shadow-[0_0_40px_rgba(99,102,241,0.6)] border-4 border-slate-900"
+        >
+          <div className="absolute inset-0 bg-white/20 group-hover:bg-transparent transition-colors rounded-full"></div>
+          <Hand size={32} className="text-white mb-1" />
+          <span className="text-white font-bold tracking-widest uppercase text-[10px]">Produzir</span>
+        </motion.button>
+      </div>
+      
+    </div>
+  );
+};
+
+// Internal component for the draggable box
+const DraggableBox = ({ box, duration, onResolve, onTimeout }: { box: PendingBox, duration: number, onResolve: Function, onTimeout: Function }) => {
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onTimeout(box.id);
+    }, duration * 1000);
+    return () => clearTimeout(timer);
+  }, [box.id, duration, onTimeout]);
+
+  return (
+    <motion.div
+      drag
+      dragConstraints={{ left: -200, right: 200, top: -400, bottom: 50 }}
+      dragSnapToOrigin
+      onDragEnd={(event, info) => {
+        // Find which tube we dropped it on based on X coordinate
+        // This is a simple approximation. Screen is divided in 4 columns.
+        const x = info.point.x;
+        const w = window.innerWidth;
+        // In a real robust app, we'd use element bounds, but dividing screen in 4 is quick for MVP.
+        // Actually, we can get the tube elements by ID!
+        let droppedColor: BoxColor | null = null;
+        for (const c of COLORS) {
+          const el = document.getElementById(`tube-${c}`);
+          if (el) {
+            const rect = el.getBoundingClientRect();
+            // Allow a generous drop zone
+            if (x >= rect.left - 40 && x <= rect.right + 40 && info.point.y <= rect.bottom + 100) {
+              droppedColor = c;
+              break;
+            }
+          }
+        }
+        
+        if (droppedColor) {
+          onResolve(box.id, box.color, droppedColor);
+        }
+      }}
+      initial={{ y: 350, opacity: 0, scale: 0.5, x: 0 }}
+      animate={{ y: -50, opacity: 1, scale: 1 }} // Float up slowly
+      exit={{ opacity: 0, scale: 0 }}
+      transition={{ y: { duration, ease: "linear" }, opacity: { duration: 0.2 } }}
+      className={`absolute left-1/2 -ml-8 z-30 cursor-grab active:cursor-grabbing flex flex-col items-center p-3 rounded-xl bg-slate-800 border-2 ${
+        box.color === 'red' ? 'border-red-500 text-red-500' :
+        box.color === 'green' ? 'border-emerald-500 text-emerald-500' :
+        box.color === 'blue' ? 'border-blue-500 text-blue-500' :
+        'border-yellow-400 text-yellow-400'
+      }`}
+    >
+      <BoxIcon size={32} />
+    </motion.div>
+  );
+};
