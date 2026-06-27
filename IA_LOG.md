@@ -1,30 +1,42 @@
-# Diário de Bordo da IA e Análise Arquitetural (IA_LOG)
+# Relatório Técnico e Evolução do Projeto (IA_LOG)
 
-Durante todo o projeto, utilizei a inteligência artificial como minha copiloto de desenvolvimento, mas assumindo sempre a direção técnica. Minha principal preocupação inicial foi garantir a solidez da arquitetura e das regras de negócio.
+**Autor:** Jardel Messias  
+**Projeto:** eKaizen - Desafio Corporativo Gamificado  
 
-## 1. Arquitetura e Motor do Jogo (Engine)
-Logo de cara, orientei a IA a não usar um `setInterval` simples e problemático para o loop do jogo. Em vez disso, implementamos o `requestAnimationFrame` junto com uma lógica de **Delta Time baseada em Timestamps**. A cada quadro da tela, nosso hook captura o tempo exato, passa para a função `processTick` e despacha os novos pontos para o nosso estado global (utilizando a biblioteca Zustand). Essa escolha técnica garantiu que o jogo continuasse processando a fábrica corretamente, calculando a produção real mesmo se o usuário minimizasse a aba.
-*(Exemplos de Commits Atômicos usados nessa fase: `feat(engine): implementa loop com delta time`, `refactor(store): adiciona estado global com Zustand`).*
+## 1. O Desafio e o Propósito
+Foi-me proposto um desafio pela empresa eKaizen focado na aplicação prática da metodologia Kaizen. Este documento serve como registro da arquitetura e desenvolvimento de um jogo gamificado, cujo intuito é simular a linha de produção de uma fábrica, equilibrando a eficiência autônoma das máquinas com a execução manual dos funcionários.
 
-## 2. UX/UI e "Juice" (Engajamento Visual)
-Com o decorrer do desenvolvimento, meu foco foi dar uma "interação viva" ao jogo. Pensei em um engajamento visual intenso (*Juice*), com animações enigmáticas e respostas claras na UI. Cada elemento de UX foi pensado para trazer clareza sobre o que está acontecendo: a ativação de habilidades, os custos, e o investimento em melhorias para reduzir desperdícios e manter o gargalo saudável (Lean Manufacturing).
-*(Exemplos de Commits Atômicos: `style(layout): ajusta cores e glassmorphism do painel principal`, `feat(ui): adiciona animações de feedback visual`).*
+Através de sessões de *Pair Programming* com a IA (que atuou no desenvolvimento braçal e geração da base do código), consegui focar na implementação das regras de negócio do Kaizen e Kanban, transformando a teoria em uma simulação interativa real.
 
-## 3. Inovações e Funcionalidades Extras
-Para ir além do que foi proposto no desafio original, decidi idealizar e implementar mecânicas extras que enriqueceram a experiência:
-- **Botão de Produção Manual:** Um botão principal com física que, ao ser clicado, acelera a produção enquanto a velocidade passiva ainda está baixa.
-- **Termômetro de Esforço:** Uma tela dinâmica que calcula o "calor do motor" baseado nos seus cliques por segundo.
-- **Letreiro de Ranking Global:** Uma vitrine em letreiro (Marquee) que demonstra o ranking dos jogadores, sendo atualizada automaticamente em background a cada 5 minutos, sem travar a tela do jogador.
-- **Métricas Avançadas:** O indicador de PPS (Pontos Por Segundo), que dá a média exata do impacto na produção instantaneamente após comprar uma habilidade.
-- **Áudio e Feedback Dinâmico:** Sons não estáticos, mas dinâmicos a cada clique, e textos flutuantes que sobem na tela para confirmar cada compra.
-*(Exemplos de Commits Atômicos dessas features: `feat(audio): adiciona sons dinâmicos aos cliques`, `feat(components): cria letreiro de ranking atualizado a cada 5 min`).*
+O intuito principal do jogo é simular e testar a **maestria do jogador na tomada de decisão, foco, melhoria contínua de processos e raciocínio rápido**. 
 
-## Conclusão e Sincronização
-A sincronização do meu raciocínio arquitetural com o versionamento feito através de **Commits Atômicos** permitiu que o projeto crescesse de forma modular, rastreável e altamente profissional. Foi um trabalho de forte liderança no direcionamento técnico, delegando o trabalho repetitivo e de sintaxe fina para a IA.
+## 2. A Mecânica Principal (A Sacada)
+Colocamos quatro tubos de coleta com cores diferentes no topo da tela e, na base, um motor de produção que libera quatro tipos de peças. 
 
-## Anexo: Principais Interações (O que pedi, o que a IA sugeriu e o que eu rejeitei)
-Para deixar claro o processo de "Pair Programming", registro aqui algumas interações cruciais onde tomei a decisão final:
-1. **O Loop do Jogo:** A princípio, a IA sugeriria lógicas simples em componentes React para atualizar os pontos. Eu **rejeitei** e exigi que a lógica fosse extraída para um motor matemático isolado (`processTick`), garantindo que a regra de negócio ficasse puramente funcional e testável.
-2. **O Bug Visual do Botão Central:** Quando a IA entregou o layout inicial, a parte inferior do botão principal estava sendo "esmagada" pela tela inferior (Dashboard). Eu apontei o erro, instruí a IA a destravar o limite de altura da área superior (`min-h-[600px]`) e a empurrar os gráficos escuros mais para baixo.
-3. **O Sistema de Ranking:** A IA sugeriu salvar os pontos constantemente. Eu **adaptei** a ideia e pedi especificamente para que a pontuação só fosse para o ranking a cada 5 minutos, e exigi um efeito visual de "foto" que desse feedback apenas nesses momentos, otimizando muito a lógica.
-4. **O Quarto Gráfico (Dashboard):** Quando pedi para preencher um espaço vazio nos gráficos, a IA me deu duas opções (Gráfico Analítico ou Termômetro Dinâmico). Eu **tomei a decisão** de seguir com o Termômetro de Esforço porque queria mais *Juice* no jogo. A IA fez o código base, mas eu guiei exatamente como ele deveria reagir aos cliques manuais.
+A "sacada" do jogo é testar o jogador (que atua como o operário): ele precisa separar a produção em tempo real, arrastando as peças para os seus tubos correspondentes. Para escalar a dificuldade e testar o foco na execução, a ordem dos tubos é embaralhada aleatoriamente a cada 2 minutos.
+
+**A Regra do Andon (Game Over):** Se o jogador colocar a peça errada no tubo correspondente, é acionado um termômetro de erro. Caso o jogador erre 10 peças, o termômetro estoura, declarando *Game Over* e a fábrica é interditada, respeitando os princípios de qualidade da metodologia.
+
+## 3. Evolução do Projeto: Do Básico ao Estado da Arte
+A medida que o jogo ia evoluindo, notamos melhorias significativas. Começamos com um projeto de *Idle Game* simples, onde o jogador apenas assistia a produção subir e clicava para comprar melhorias. 
+
+Percebendo a necessidade de gerar mais engajamento, evoluímos a arquitetura para um **jogo ativo**, inserindo o minigame de separação física (Drag and Drop), mas mantendo a "prospecção de background" (a fábrica continua produzindo passivamente ao fundo).
+
+## 4. Histórico de Testes (QA) e Resolução de Bugs
+Foram detectados alguns bugs durante os nossos testes práticos que nos fizeram refinar a estratégia técnica de código, sem comprometer as regras da metodologia.
+
+### 🐛 Desalinhamento no Mobile (Problema de Responsividade)
+- **O que foi percebido:** Na tela mobile, os gráficos e o posicionamento dos componentes estavam desalinhados, quebrando o design e engolindo o botão de Produzir.
+- **Como contornamos (Técnica):** Refatoramos a estrutura `flexbox` do React (nos arquivos `App.tsx` e `SortingMinigame.tsx`). Removemos alturas fixas e aplicamos classes dinâmicas do Tailwind (`h-full`, `flex-col lg:flex-row`), fazendo os painéis de melhorias se adaptarem corretamente em telas menores.
+
+### 🐛 Sobreposição de Peças (Bug de Spawn)
+- **O que foi percebido:** Ao clicar várias vezes seguidas no botão de acelerar a produção, as peças nasciam grudadas umas sobre as outras no exato centro da tela.
+- **Como contornamos (Técnica):** Implementamos um cálculo de *Scatter* (Espalhamento). No código, passamos a gerar uma coordenada `startX` aleatória para cada nova caixa, criando um efeito visual realista das peças saindo espalhadas pela esteira.
+
+### 🐛 "Pane" no Mouse (Bug de Performance no React)
+- **O que foi percebido:** Foi detectada uma instabilidade no mouse, provocando um tipo de "mau contato" e travamento físico na hora de pegar as peças, principalmente quando a barra de erros já estava perto de estourar.
+- **Como contornamos (Técnica):** Identifiquei que o problema era de performance de renderização do React. O componente principal estava escutando variáveis globais (Zustand) que mudavam toda hora. Quando o jogador errava, o termômetro atualizava e o React recarregava a tela toda, travando o sistema de física (`framer-motion`). 
+Para resolver, apliquei técnicas de **Isolamento de Estado** (separando o placar e o termômetro em sub-componentes independentes) e **Memoização**, envelopando as peças arrastáveis com `React.memo`. Isso blindou a performance e deixou o arraste perfeitamente fluido.
+
+## 5. Conclusão
+A construção deste projeto não só aplicou os conceitos industriais de forma visual e interativa, como também serviu de campo de prova para arquitetura de software limpa, manipulação de estado otimizada e design responsivo no ecossistema moderno de frontend.
