@@ -20,7 +20,7 @@ interface PendingBox {
 }
 
 export const SortingMinigame = () => {
-  const { resolveBox, upgrades, consecutiveCorrectManualBoxes, points } = useGameStore();
+  const { resolveBox, upgrades, consecutiveCorrectManualBoxes, points, manualErrors } = useGameStore();
   const [boxes, setBoxes] = useState<PendingBox[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -86,6 +86,20 @@ export const SortingMinigame = () => {
         )}
       </div>
       
+      {/* MANUAL ERROR THERMOMETER */}
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-[400px] bg-slate-900 border-2 border-slate-700 rounded-full flex flex-col-reverse p-1 gap-1 z-20">
+        {Array.from({ length: 10 }).map((_, i) => (
+          <div 
+            key={i} 
+            className={`flex-1 rounded-full transition-colors duration-300 ${
+              i < manualErrors 
+                ? (i >= 8 ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]' : 'bg-orange-500') 
+                : 'bg-slate-800'
+            }`}
+          />
+        ))}
+      </div>
+      
       {/* TUBES AT THE TOP */}
       <div className="flex w-full justify-around z-20">
         {COLORS.map((color) => {
@@ -146,9 +160,10 @@ export const SortingMinigame = () => {
 const DraggableBox = ({ box, duration, onResolve, onTimeout }: { box: PendingBox, duration: number, onResolve: Function, onTimeout: Function }) => {
   
   useEffect(() => {
+    // 1.5s tolerance at the top before it vanishes
     const timer = setTimeout(() => {
       onTimeout(box.id);
-    }, duration * 1000);
+    }, (duration + 1.5) * 1000);
     return () => clearTimeout(timer);
   }, [box.id, duration, onTimeout]);
 

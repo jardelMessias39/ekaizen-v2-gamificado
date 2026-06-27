@@ -24,6 +24,11 @@ export interface GameState {
   lastMistakeTimestamp: number; // Para o bônus de 5 minutos
   activeBonusUntil: number | null; // Timestamp de expiração do bônus de velocidade
   bonusSpeedMultiplier: number; // 1.0 = normal, 1.02 = +2% bônus, etc.
+  
+  // Game Over (Andon Crítico) e Limites do Bônus
+  manualErrors: number;
+  isGameOver: boolean;
+  boxesSortedSinceLastMistake: number;
 }
 
 export interface DerivedStats {

@@ -4,15 +4,15 @@ import { useGameStore } from '../store/gameStore';
 import { playSound } from '../utils/audio';
 
 export const BonusModal = () => {
-  const { consecutiveCorrectManualBoxes, lastMistakeTimestamp, chooseBonus } = useGameStore();
+  const { lastMistakeTimestamp, chooseBonus, boxesSortedSinceLastMistake } = useGameStore();
   const [showModal, setShowModal] = useState(false);
   const [bonusDuration, setBonusDuration] = useState(20);
 
   useEffect(() => {
     const interval = setInterval(() => {
       const now = Date.now();
-      // If 5 minutes (300000ms) without mistake and has played at least a little
-      if (consecutiveCorrectManualBoxes > 0 && (now - lastMistakeTimestamp) >= 300000) {
+      // If 5 minutes (300000ms) without mistake and sorted at least 50 boxes
+      if (boxesSortedSinceLastMistake >= 50 && (now - lastMistakeTimestamp) >= 300000) {
         if (!showModal) {
           setShowModal(true);
           playSound('buy');

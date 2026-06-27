@@ -20,6 +20,10 @@ export const createInitialState = (): GameState => ({
   lastMistakeTimestamp: Date.now(),
   activeBonusUntil: null,
   bonusSpeedMultiplier: 1.0,
+
+  manualErrors: 0,
+  isGameOver: false,
+  boxesSortedSinceLastMistake: 0,
 });
 
 export const calculateUpgradeCost = (upgradeId: UpgradeId, currentPurchases: number): number => {
@@ -96,6 +100,10 @@ export const buyUpgrade = (state: GameState, upgradeId: UpgradeId): GameState =>
 
 export const processTick = (state: GameState, currentTimestamp: number): GameState => {
   // Regra 2: Aba em background continua produzindo.
+  // Se está em Game Over, a linha está parada.
+  if (state.isGameOver) {
+    return state;
+  }
   
   let activeBonusUntil = state.activeBonusUntil || null;
   let bonusSpeedMultiplier = state.bonusSpeedMultiplier || 1.0;
@@ -139,12 +147,21 @@ export const processTick = (state: GameState, currentTimestamp: number): GameSta
 export const resolveManualBox = (state: GameState, isCorrect: boolean, currentTimestamp: number, boxColor?: string): GameState => {
   let newConsecutive = state.consecutiveCorrectManualBoxes || 0;
   let newLastMistake = state.lastMistakeTimestamp || currentTimestamp;
+  let newManualErrors = state.manualErrors || 0;
+  let newBoxesSorted = state.boxesSortedSinceLastMistake || 0;
+  let newIsGameOver = state.isGameOver || false;
   
+  // Se já está game over, não faz nada com caixas
+  if (newIsGameOver) return state;
+
   let gainedPoints = 0;
   let gainedDefects = 0;
   
   if (isCorrect) {
     newConsecutive++;
+    newBoxesSorted++;
+    newManualErrors = Math.max(0, newManualErrors - 1); // Acertar cura a barra de vida
+    
     // Diferent colors give different base points
     let basePoints = 10;
     if (boxColor === 'green') basePoints = 20;
@@ -157,18 +174,34 @@ export const resolveManualBox = (state: GameState, isCorrect: boolean, currentTi
     if (newConsecutive >= 50) gainedPoints = basePoints * 5;
   } else {
     newConsecutive = 0;
+    newBoxesSorted = 0;
     newLastMistake = currentTimestamp;
+    newManualErrors++;
     gainedDefects = 1;
   }
   
+  let finalPoints = (state.points || 0) + gainedPoints;
+  
+  // Checagem de Game Over (Andon - Parada Crítica)
+  if (newManualErrors >= 10) {
+    newIsGameOver = true;
+    finalPoints = 0; // Punição!
+    newManualErrors = 0;
+    newConsecutive = 0;
+    newBoxesSorted = 0;
+  }
+
   return {
     ...state,
     totalProduced: (state.totalProduced || 0) + 1,
     totalDefective: (state.totalDefective || 0) + gainedDefects,
     totalGood: (state.totalGood || 0) + (isCorrect ? 1 : 0),
-    points: (state.points || 0) + gainedPoints,
+    points: finalPoints,
     consecutiveCorrectManualBoxes: newConsecutive,
     lastMistakeTimestamp: newLastMistake,
+    manualErrors: newManualErrors,
+    isGameOver: newIsGameOver,
+    boxesSortedSinceLastMistake: newBoxesSorted,
   };
 };
 

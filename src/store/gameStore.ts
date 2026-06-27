@@ -12,6 +12,7 @@ interface GameStore extends GameState {
   resolveBox: (isCorrect: boolean, boxColor?: string) => void;
   chooseBonus: (type: 'speed' | 'points', value: number, durationSeconds: number) => void;
   reset: () => void;
+  acknowledgeGameOver: () => void;
   isHydrated: boolean;
   setHydrated: () => void;
 }
@@ -167,6 +168,14 @@ export const useGameStore = create<GameStore>((set) => {
       const freshState = createInitialState();
       localStorage.removeItem(STORAGE_KEY);
       set({ ...freshState, stats: calculateDerivedStats(freshState.upgrades), history: [] });
+    },
+    
+    acknowledgeGameOver: () => {
+      set((state) => {
+        const newState = { ...state, isGameOver: false };
+        saveState(newState);
+        return newState;
+      });
     },
   };
 });

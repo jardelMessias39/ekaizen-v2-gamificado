@@ -1,9 +1,10 @@
 import { useGameStore } from '../store/gameStore';
 import { motion } from 'framer-motion';
-import { AlertTriangle, ShieldCheck, Activity, TrendingUp } from 'lucide-react';
+import { AlertTriangle, ShieldCheck, Activity, TrendingUp, PowerOff } from 'lucide-react';
+import { playSound } from '../utils/audio';
 
 export const DiagnosticPanel = () => {
-  const { stats } = useGameStore();
+  const { stats, reset } = useGameStore();
   
   let status = 'good';
   let message = 'Fábrica operando no estado da arte Kaizen! Continue escalando.';
@@ -42,12 +43,24 @@ export const DiagnosticPanel = () => {
       <div>
         <Icon className={status === 'critical' ? 'animate-bounce' : ''} size={24} />
       </div>
-      <div className="flex flex-col">
+      <div className="flex flex-col flex-1">
         <h3 className="font-black text-[10px] uppercase tracking-widest opacity-80">
           Diagnóstico do Analista IA
         </h3>
         <p className="text-sm font-bold leading-snug">{message}</p>
       </div>
+      <button 
+        onClick={() => {
+          if (confirm("ATENÇÃO: Deseja zerar toda a fábrica e recomeçar do zero? Todos os pontos e melhorias serão perdidos.")) {
+            playSound('error');
+            reset();
+          }
+        }}
+        title="Hard Reset - Zerar Save"
+        className="ml-auto p-2 bg-red-950/50 hover:bg-red-600 border border-red-500/50 rounded-lg text-red-300 hover:text-white transition-colors"
+      >
+        <PowerOff size={18} />
+      </button>
     </motion.div>
   );
 };

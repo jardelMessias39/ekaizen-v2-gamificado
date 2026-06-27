@@ -6,6 +6,7 @@ import { formatNumber, formatPercentage } from '../utils/formatters';
 import { DiagnosticPanel } from './DiagnosticPanel';
 import { SortingMinigame } from './SortingMinigame';
 import { BonusModal } from './BonusModal';
+import { GameOverModal } from './GameOverModal';
 
 interface FloatingItem {
   id: number;
@@ -117,6 +118,7 @@ export const FactoryDisplay = () => {
       {/* Empty block, old floor was removed */}
 
       <BonusModal />
+      <GameOverModal />
     </div>
   );
 };
